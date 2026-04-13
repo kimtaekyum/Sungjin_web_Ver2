@@ -22,7 +22,7 @@ export default function Footer() {
               alt={ACADEMY_INFO.name}
               width={140}
               height={32}
-              className="h-8 w-auto brightness-0 invert mb-3"
+              className="h-8 w-auto mb-3"
             />
             <p className="text-sm text-white/50 leading-relaxed">
               {ACADEMY_INFO.slogan}
@@ -54,12 +54,14 @@ export default function Footer() {
             </h4>
             <div className="space-y-2.5 text-sm text-white/60">
               <p>{ACADEMY_INFO.address}</p>
+              <p className="text-white/40">{ACADEMY_INFO.addressLegacy}</p>
               <p>
                 <a href={`tel:${ACADEMY_INFO.phone}`} className="hover:text-white transition-colors">
                   {ACADEMY_INFO.phone}
                 </a>
               </p>
               <p>{ACADEMY_INFO.operatingHours}</p>
+              <p className="text-white/40">{ACADEMY_INFO.registrationNo}</p>
             </div>
           </div>
 

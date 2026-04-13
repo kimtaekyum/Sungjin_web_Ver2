@@ -58,12 +58,8 @@ function AnimatedNumber({ value, prefix, suffix }: { value: string; prefix?: str
 export default function StatsCounter() {
   return (
     <section className="relative bg-surface py-16 md:py-24 overflow-hidden">
-      {/* Decorative circles */}
-      <div className="absolute top-8 right-12 w-32 h-32 rounded-full border-2 border-primary/5 hidden md:block" />
-      <div className="absolute bottom-8 left-8 w-20 h-20 rounded-full border-2 border-border hidden md:block" />
-
       <div className="relative mx-auto max-w-[1200px] px-4 md:px-6">
-        <p className="text-center text-xs font-medium tracking-[0.2em] uppercase text-text-hint mb-10 md:mb-14">
+        <p className="text-center text-base font-medium tracking-[0.15em] text-text-sub mb-10 md:mb-14 md:text-lg">
           성진학원이 걸어온 길
         </p>
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4 md:gap-12">

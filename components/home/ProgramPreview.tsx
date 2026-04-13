@@ -56,7 +56,7 @@ export default function ProgramPreview() {
 
                 <Button
                   variant="ghost"
-                  href={`/programs#${p.slug}`}
+                  href="/contact"
                   className="w-full text-sm group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all"
                 >
                   {p.ctaText}

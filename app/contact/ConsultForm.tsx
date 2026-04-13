@@ -87,7 +87,7 @@ export default function ConsultForm() {
 
       <div>
         <label className="block text-sm font-medium text-text mb-1.5">
-          학생 학년 <span className="text-danger">*</span>
+          학생 <span className="text-danger">*</span>
         </label>
         <select
           required
@@ -96,15 +96,9 @@ export default function ConsultForm() {
           className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 bg-white transition-all"
         >
           <option value="">선택하세요</option>
-          <option value="초4">초등 4학년</option>
-          <option value="초5">초등 5학년</option>
-          <option value="초6">초등 6학년</option>
-          <option value="중1">중학교 1학년</option>
-          <option value="중2">중학교 2학년</option>
-          <option value="중3">중학교 3학년</option>
-          <option value="고1">고등학교 1학년</option>
-          <option value="고2">고등학교 2학년</option>
-          <option value="고3">고등학교 3학년</option>
+          <option value="초등">초등학생</option>
+          <option value="중등">중학생</option>
+          <option value="고등">고등학생</option>
         </select>
       </div>
 

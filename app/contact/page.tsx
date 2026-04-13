@@ -38,16 +38,23 @@ export default function ContactPage() {
                 <h3 className="text-lg font-medium text-[#444444] mb-4">
                   오시는 길
                 </h3>
-                <div className="rounded-xl bg-bg aspect-video flex items-center justify-center mb-4">
+                <a
+                  href={ACADEMY_INFO.naverMapLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block rounded-xl bg-bg aspect-video flex items-center justify-center mb-4 hover:bg-border/30 transition-colors"
+                >
                   <div className="text-center">
-                    <div className="text-text-hint mb-2">
+                    <div className="text-primary mb-2">
                       <FaIcon name="location-dot" className="w-8 h-8 mx-auto" />
                     </div>
-                    <p className="text-sm text-text-sub">지도 영역</p>
+                    <p className="text-sm font-medium text-text">네이버 지도에서 보기</p>
+                    <p className="text-xs text-text-hint mt-1">클릭하면 네이버 지도로 이동합니다</p>
                   </div>
-                </div>
+                </a>
                 <div className="space-y-2 text-sm text-text-sub">
                   <p><strong className="text-text">주소:</strong> {ACADEMY_INFO.address}</p>
+                  <p className="text-text-hint">{ACADEMY_INFO.addressLegacy}</p>
                   <p>
                     <strong className="text-text">전화:</strong>{" "}
                     <a href={`tel:${ACADEMY_INFO.phone}`} className="text-primary hover:underline">
@@ -55,6 +62,7 @@ export default function ContactPage() {
                     </a>
                   </p>
                   <p><strong className="text-text">운영시간:</strong> {ACADEMY_INFO.operatingHours}</p>
+                  <p className="text-text-hint">{ACADEMY_INFO.registrationNo}</p>
                 </div>
               </div>
 
