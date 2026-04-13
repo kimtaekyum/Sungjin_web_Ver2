@@ -7,15 +7,14 @@ import { getNotices, type Notice } from "@/lib/notices";
 
 export default function NoticesPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   useEffect(() => {
-    const all = getNotices();
-    const sorted = all.sort((a, b) => {
-      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    getNotices().then((data) => {
+      setNotices(data);
+      setLoading(false);
     });
-    setNotices(sorted);
   }, []);
 
   return (
@@ -26,7 +25,11 @@ export default function NoticesPage() {
           subtitle="성진학원의 새로운 소식을 확인하세요"
         />
 
-        {notices.length === 0 ? (
+        {loading ? (
+          <div className="mx-auto max-w-3xl rounded-xl bg-surface border border-border/50 p-16 text-center">
+            <p className="text-text-sub text-sm">불러오는 중...</p>
+          </div>
+        ) : notices.length === 0 ? (
           <div className="mx-auto max-w-3xl rounded-xl bg-surface border border-border/50 p-16 text-center">
             <div className="text-text-hint mb-3">
               <FaIcon name="clipboard-list" className="w-10 h-10 mx-auto" />
@@ -56,7 +59,7 @@ export default function NoticesPage() {
                   </div>
                   <div className="flex items-center gap-3 shrink-0 ml-4">
                     <span className="text-xs text-text-hint">
-                      {new Date(notice.createdAt).toLocaleDateString("ko-KR", {
+                      {new Date(notice.created_at).toLocaleDateString("ko-KR", {
                         year: "numeric",
                         month: "long",
                         day: "numeric",
