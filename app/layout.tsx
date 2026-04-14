@@ -10,7 +10,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "성진학원 | 대학 잘 보내는 1대1 맞춤 첨삭 전문 - 신월동 30년 입시 학원",
+    default: "성진학원",
     template: "%s | 성진학원",
   },
   description:
