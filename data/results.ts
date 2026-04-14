@@ -20,22 +20,33 @@ export const admissionResults: AdmissionResult[] = [
 ];
 
 /**
- * 대학별 로고 파일 경로 매핑 (public/images/대학로고/ 기준)
+ * 대학별 로고 설정 (public/images/대학로고/ 기준)
+ * - path: 파일 경로
+ * - scale: 로고 이미지 내부 여백 차이를 보정하는 배율 (기본 1)
+ *   원본 이미지마다 로고 mark 주변 공간이 달라서 object-contain만으로는
+ *   시각적 크기가 안 맞음. 서울대(1.0)를 기준으로 다른 로고를 보정.
+ *
  * 매핑에 없는 대학은 로고 없이 렌더링됨 (깔끔한 폴백)
  *
  * TODO:
  *  - 고려대: .ai → .png 변환 후 추가
- *  - 원광대, 전북대: 로고 파일 확보 후 추가
  */
-export const UNIVERSITY_LOGOS: Record<string, string> = {
-  "서울대": "/images/대학로고/서울대.png",
-  "포항공대": "/images/대학로고/포항공대.png",
-  "연세대": "/images/대학로고/연세대.jpg",
-  "성균관대": "/images/대학로고/성균관대.jpg",
-  "한양대": "/images/대학로고/한양대.svg",
-  "동국대": "/images/대학로고/동국대.jpg",
-  "건국대": "/images/대학로고/건국대.jpg",
-  "인하대": "/images/대학로고/인하대.jpg",
+export type UniversityLogo = {
+  path: string;
+  scale?: number;
+};
+
+export const UNIVERSITY_LOGOS: Record<string, UniversityLogo> = {
+  "서울대": { path: "/images/대학로고/서울대.png" },
+  "포항공대": { path: "/images/대학로고/포항공대.png" },
+  "연세대": { path: "/images/대학로고/연세대.jpg", scale: 1.25 },
+  "성균관대": { path: "/images/대학로고/성균관대.jpg" },
+  "한양대": { path: "/images/대학로고/한양대.svg" },
+  "동국대": { path: "/images/대학로고/동국대.jpg" },
+  "건국대": { path: "/images/대학로고/건국대.jpg" },
+  "인하대": { path: "/images/대학로고/인하대.jpg" },
+  "원광대": { path: "/images/대학로고/원광대.jpg" },
+  "전북대": { path: "/images/대학로고/전북대.png" },
 };
 
 export interface ScoreImprovement {

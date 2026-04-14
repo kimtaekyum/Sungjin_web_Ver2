@@ -16,23 +16,24 @@ export default function AdmissionHighlight() {
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
           {admissionResults.slice(0, 8).map((r, i) => {
-            const logoPath = UNIVERSITY_LOGOS[r.university];
+            const logo = UNIVERSITY_LOGOS[r.university];
             return (
               <article
                 key={i}
                 className="group relative rounded-2xl bg-white border border-border/60 p-6 md:p-7 text-center transition-all duration-300 hover:border-primary/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 overflow-hidden"
               >
                 {/* 로고 워터마크 배경 */}
-                {logoPath && (
+                {logo && (
                   <div
                     aria-hidden
                     className="pointer-events-none absolute inset-0 flex items-center justify-center"
                   >
                     <Image
-                      src={logoPath}
+                      src={logo.path}
                       alt=""
                       width={160}
                       height={160}
+                      style={{ transform: `scale(${logo.scale ?? 1})` }}
                       className="object-contain w-32 h-32 md:w-40 md:h-40 opacity-[0.07] grayscale transition-opacity duration-300 group-hover:opacity-[0.14]"
                     />
                   </div>
