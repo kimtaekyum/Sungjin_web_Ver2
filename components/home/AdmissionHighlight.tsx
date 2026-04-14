@@ -4,43 +4,49 @@ import { admissionResults } from "@/data/results";
 
 export default function AdmissionHighlight() {
   return (
-    <section className="py-16 md:py-24">
-      <div className="mx-auto max-w-[1200px] px-4 md:px-6">
+    <section className="relative py-16 md:py-24 bg-gradient-to-b from-bg to-surface/40 overflow-hidden">
+      {/* Decorative background accent */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+      <div className="relative mx-auto max-w-[1200px] px-4 md:px-6">
         <SectionTitle
           title="2026학년도 합격 실적"
           subtitle="성진학원의 검증된 입시 결과"
         />
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-5">
+
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
           {admissionResults.slice(0, 8).map((r, i) => (
-            <div
+            <article
               key={i}
-              className={`group rounded-xl p-6 text-center transition-all duration-200 ${
-                r.highlight
-                  ? "bg-[#F5E6C4] border border-[#D4A84B]/30"
-                  : "bg-surface border border-border/50 hover:border-[#9F9E9E]"
-              }`}
+              className="group relative rounded-2xl bg-white border border-border/60 p-6 md:p-7 text-center transition-all duration-300 hover:border-primary/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-0.5"
             >
-              {r.highlight && (
-                <div className="inline-flex items-center gap-1 rounded-full bg-[#D4A84B]/20 px-2.5 py-0.5 text-[10px] font-medium text-[#8B6914] mb-3">
-                  TOP
-                </div>
-              )}
-              <h3
-                className={`text-xl font-medium md:text-2xl ${
-                  r.highlight ? "text-[#2C2C2A]" : "text-[#444444]"
-                }`}
+              {/* 합격 체크 아이콘 */}
+              <span
+                aria-hidden
+                className="absolute top-3 right-3 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white"
               >
+                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
+
+              <h3 className="text-xl md:text-2xl font-medium text-[#2C2C2A] tracking-tight">
                 {r.university}
               </h3>
-              {r.department && (
-                <p className={`mt-1.5 text-sm ${r.highlight ? "text-[#6B6A6A]" : "text-text-sub"}`}>
+              {r.department ? (
+                <p className="mt-2 text-sm text-text-sub leading-snug min-h-[2.5rem]">
                   {r.department}
                 </p>
+              ) : (
+                <p className="mt-2 text-sm text-text-hint leading-snug min-h-[2.5rem]">
+                  &nbsp;
+                </p>
               )}
-            </div>
+            </article>
           ))}
         </div>
-        <div className="mt-10 text-center">
+
+        <div className="mt-12 text-center">
           <Button variant="ghost" href="/results">
             더 많은 실적 보기 →
           </Button>
