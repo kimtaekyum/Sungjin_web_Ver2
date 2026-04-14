@@ -27,9 +27,6 @@ export const admissionResults: AdmissionResult[] = [
  *   시각적 크기가 안 맞음. 서울대(1.0)를 기준으로 다른 로고를 보정.
  *
  * 매핑에 없는 대학은 로고 없이 렌더링됨 (깔끔한 폴백)
- *
- * TODO:
- *  - 고려대: .ai → .png 변환 후 추가
  */
 export type UniversityLogo = {
   path: string;
@@ -40,6 +37,7 @@ export const UNIVERSITY_LOGOS: Record<string, UniversityLogo> = {
   "서울대": { path: "/images/대학로고/서울대.png" },
   "포항공대": { path: "/images/대학로고/포항공대.png" },
   "연세대": { path: "/images/대학로고/연세대.jpg", scale: 1.25 },
+  "고려대": { path: "/images/대학로고/고려대.gif", scale: 1.25 },
   "성균관대": { path: "/images/대학로고/성균관대.jpg" },
   "한양대": { path: "/images/대학로고/한양대.svg" },
   "동국대": { path: "/images/대학로고/동국대.jpg" },
