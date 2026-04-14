@@ -79,18 +79,58 @@ export default function ContactPage() {
                     </svg>
                   </div>
                 </a>
-                <div className="space-y-2 text-sm text-text-sub">
-                  <p><strong className="text-text">주소:</strong> {ACADEMY_INFO.address}</p>
-                  <p className="text-text-hint">{ACADEMY_INFO.addressLegacy}</p>
-                  <p>
-                    <strong className="text-text">전화:</strong>{" "}
-                    <a href={`tel:${ACADEMY_INFO.phone}`} className="text-primary hover:underline">
-                      {ACADEMY_INFO.phone}
-                    </a>
-                  </p>
-                  <p><strong className="text-text">운영시간:</strong> {ACADEMY_INFO.operatingHours}</p>
-                  <p className="text-text-hint">{ACADEMY_INFO.registrationNo}</p>
-                </div>
+                <dl className="mt-6 divide-y divide-border/50 text-sm">
+                  {/* 주소 */}
+                  <div className="flex items-start gap-4 py-4">
+                    <span className="shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-lg bg-primary/10 text-primary">
+                      <FaIcon name="location-dot" className="w-4 h-4" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <dt className="text-xs font-medium tracking-wider text-text-hint uppercase mb-1">
+                        Address
+                      </dt>
+                      <dd className="text-text leading-relaxed">{ACADEMY_INFO.address}</dd>
+                      <dd className="text-text-hint text-xs mt-1">{ACADEMY_INFO.addressLegacy}</dd>
+                    </div>
+                  </div>
+
+                  {/* 전화 */}
+                  <div className="flex items-start gap-4 py-4">
+                    <span className="shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-lg bg-primary/10 text-primary">
+                      <FaIcon name="phone" className="w-4 h-4" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <dt className="text-xs font-medium tracking-wider text-text-hint uppercase mb-1">
+                        Phone
+                      </dt>
+                      <dd>
+                        <a
+                          href={`tel:${ACADEMY_INFO.phone}`}
+                          className="text-primary font-medium hover:underline tabular-nums"
+                        >
+                          {ACADEMY_INFO.phone}
+                        </a>
+                      </dd>
+                    </div>
+                  </div>
+
+                  {/* 운영시간 */}
+                  <div className="flex items-start gap-4 py-4">
+                    <span className="shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-lg bg-primary/10 text-primary">
+                      <FaIcon name="clock" className="w-4 h-4" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <dt className="text-xs font-medium tracking-wider text-text-hint uppercase mb-1">
+                        Hours
+                      </dt>
+                      <dd className="text-text leading-relaxed">{ACADEMY_INFO.operatingHours}</dd>
+                    </div>
+                  </div>
+                </dl>
+
+                <p className="mt-4 pt-4 border-t border-border/50 text-xs text-text-hint">
+                  {ACADEMY_INFO.registrationNo}
+                </p>
               </div>
 
               {/* 빠른 연락 */}
