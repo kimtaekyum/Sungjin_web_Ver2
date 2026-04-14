@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import SectionTitle from "@/components/ui/SectionTitle";
 import Accordion from "@/components/ui/Accordion";
 import FaIcon from "@/components/ui/FaIcon";
@@ -42,14 +43,40 @@ export default function ContactPage() {
                   href={ACADEMY_INFO.naverMapLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block rounded-xl bg-bg aspect-video flex items-center justify-center mb-4 hover:bg-border/30 transition-colors"
+                  aria-label="네이버 지도에서 성진학원 위치 보기"
+                  className="group relative block overflow-hidden rounded-xl aspect-video mb-4 border border-border/50 hover:border-primary/40 transition-colors"
                 >
-                  <div className="text-center">
-                    <div className="text-primary mb-2">
-                      <FaIcon name="location-dot" className="w-8 h-8 mx-auto" />
+                  <Image
+                    src="/images/지도.png"
+                    alt="성진학원 위치 지도"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    priority
+                  />
+
+                  {/* 핀 (학원 위치 강조) */}
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <div className="relative -translate-y-2">
+                      <span className="absolute inset-0 -z-10 rounded-full bg-primary/30 blur-md animate-ping" />
+                      <span className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-primary text-white shadow-lg ring-4 ring-white/80">
+                        <FaIcon name="location-dot" className="w-5 h-5" />
+                      </span>
                     </div>
-                    <p className="text-sm font-medium text-text">네이버 지도에서 보기</p>
-                    <p className="text-xs text-text-hint mt-1">클릭하면 네이버 지도로 이동합니다</p>
+                  </div>
+
+                  {/* 좌상단 배지: 네이버 지도 연동 느낌 */}
+                  <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-md bg-white/95 backdrop-blur-sm px-2.5 py-1.5 text-xs font-medium text-text shadow-sm">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#03C75A]" />
+                    NAVER 지도
+                  </div>
+
+                  {/* 우하단 CTA: 호버 시 강조 */}
+                  <div className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-md bg-white/95 backdrop-blur-sm px-3 py-1.5 text-xs font-medium text-text shadow-sm transition-colors group-hover:bg-primary group-hover:text-white">
+                    지도에서 길찾기
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
                   </div>
                 </a>
                 <div className="space-y-2 text-sm text-text-sub">
