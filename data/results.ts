@@ -36,13 +36,13 @@ export type UniversityLogo = {
 export const UNIVERSITY_LOGOS: Record<string, UniversityLogo> = {
   "서울대": { path: "/images/대학로고/서울대.png" },
   "포항공대": { path: "/images/대학로고/포항공대.png" },
-  "연세대": { path: "/images/대학로고/연세대.jpg", scale: 1.25 },
+  "연세대": { path: "/images/대학로고/연세대.jpg", scale: 1.5 },
   "고려대": { path: "/images/대학로고/고려대.gif", scale: 1.25 },
-  "성균관대": { path: "/images/대학로고/성균관대.jpg" },
+  "성균관대": { path: "/images/대학로고/성균관대.jpg", scale: 1.35 },
   "한양대": { path: "/images/대학로고/한양대.svg" },
   "동국대": { path: "/images/대학로고/동국대.jpg" },
   "건국대": { path: "/images/대학로고/건국대.jpg" },
-  "인하대": { path: "/images/대학로고/인하대.jpg" },
+  "인하대": { path: "/images/대학로고/인하대.jpg", scale: 1.3 },
   "원광대": { path: "/images/대학로고/원광대.jpg" },
   "전북대": { path: "/images/대학로고/전북대.png" },
 };
