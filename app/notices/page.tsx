@@ -77,17 +77,66 @@ export default function NoticesPage() {
                     </svg>
                   </div>
                 </button>
-                {notice.content && (
-                  <div
-                    className={`overflow-hidden transition-all duration-300 ${
-                      expandedId === notice.id ? "max-h-96 pb-5" : "max-h-0"
-                    }`}
-                  >
-                    <p className="px-5 text-text-sub text-[15px] leading-relaxed whitespace-pre-wrap">
-                      {notice.content}
-                    </p>
-                  </div>
-                )}
+                {notice.content && (() => {
+                  // "원문 보기: <URL>" 패턴 추출 (네이버 블로그 원문 링크)
+                  const sourceMatch = notice.content.match(
+                    /원문\s*보기\s*[:：]\s*(https?:\/\/\S+)/
+                  );
+                  const sourceUrl = sourceMatch?.[1];
+                  const body = sourceUrl
+                    ? notice.content.replace(sourceMatch![0], "").trim()
+                    : notice.content;
+
+                  return (
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ${
+                        expandedId === notice.id ? "max-h-[32rem] pb-5" : "max-h-0"
+                      }`}
+                    >
+                      <p className="px-5 text-text-sub text-[15px] leading-relaxed whitespace-pre-wrap">
+                        {body}
+                      </p>
+                      {sourceUrl && (
+                        <div className="px-5 mt-4">
+                          <a
+                            href={sourceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 rounded-lg bg-primary/10 hover:bg-primary hover:text-white text-primary px-4 py-2 text-sm font-medium transition-colors"
+                          >
+                            <svg
+                              className="h-4 w-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                              />
+                            </svg>
+                            네이버 블로그에서 원문 보기
+                            <svg
+                              className="h-3.5 w-3.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M14 5l7 7m0 0l-7 7m7-7H3"
+                              />
+                            </svg>
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             ))}
           </div>
