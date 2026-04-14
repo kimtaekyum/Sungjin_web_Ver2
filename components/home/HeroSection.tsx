@@ -72,7 +72,7 @@ export default function HeroSection() {
                       width={220}
                       height={220}
                       style={{ transform: `scale(${UNIVERSITY_LOGOS["서울대"].scale ?? 1})` }}
-                      className="object-contain w-44 h-44 opacity-20"
+                      className="object-contain w-44 h-44"
                     />
                   </div>
                 )}
