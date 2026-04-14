@@ -19,6 +19,25 @@ export const admissionResults: AdmissionResult[] = [
   { university: "전북대", department: "사학과" },
 ];
 
+/**
+ * 대학별 로고 파일 경로 매핑 (public/images/대학로고/ 기준)
+ * 매핑에 없는 대학은 로고 없이 렌더링됨 (깔끔한 폴백)
+ *
+ * TODO:
+ *  - 고려대: .ai → .png 변환 후 추가
+ *  - 원광대, 전북대: 로고 파일 확보 후 추가
+ */
+export const UNIVERSITY_LOGOS: Record<string, string> = {
+  "서울대": "/images/대학로고/서울대.png",
+  "포항공대": "/images/대학로고/포항공대.png",
+  "연세대": "/images/대학로고/연세대.jpg",
+  "성균관대": "/images/대학로고/성균관대.jpg",
+  "한양대": "/images/대학로고/한양대.svg",
+  "동국대": "/images/대학로고/동국대.jpg",
+  "건국대": "/images/대학로고/건국대.jpg",
+  "인하대": "/images/대학로고/인하대.jpg",
+};
+
 export interface ScoreImprovement {
   subject: string;
   before: string;

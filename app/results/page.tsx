@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import SectionTitle from "@/components/ui/SectionTitle";
-import { admissionResults, scoreImprovements } from "@/data/results";
+import { admissionResults, scoreImprovements, UNIVERSITY_LOGOS } from "@/data/results";
 
 export const metadata: Metadata = {
   title: "합격 실적 | 2026 서울대·포항공대 합격 - 성진학원",
@@ -19,35 +20,54 @@ export default function ResultsPage() {
             subtitle="성진학원의 검증된 입시 결과"
           />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
-            {admissionResults.map((r, i) => (
-              <article
-                key={i}
-                className="group relative rounded-2xl bg-white border border-border/60 p-6 md:p-7 text-center transition-all duration-300 hover:border-primary/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-0.5"
-              >
-                {/* 합격 체크 아이콘 */}
-                <span
-                  aria-hidden
-                  className="absolute top-3 right-3 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white"
+            {admissionResults.map((r, i) => {
+              const logoPath = UNIVERSITY_LOGOS[r.university];
+              return (
+                <article
+                  key={i}
+                  className="group relative rounded-2xl bg-white border border-border/60 p-6 md:p-7 text-center transition-all duration-300 hover:border-primary/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 overflow-hidden"
                 >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </span>
+                  {/* 로고 워터마크 배경 */}
+                  {logoPath && (
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 flex items-center justify-center"
+                    >
+                      <Image
+                        src={logoPath}
+                        alt=""
+                        width={160}
+                        height={160}
+                        className="object-contain w-28 h-28 md:w-36 md:h-36 opacity-[0.07] grayscale transition-opacity duration-300 group-hover:opacity-[0.14]"
+                      />
+                    </div>
+                  )}
 
-                <h3 className="text-lg md:text-xl font-medium text-[#2C2C2A] tracking-tight">
-                  {r.university}
-                </h3>
-                {r.department ? (
-                  <p className="mt-2 text-sm text-text-sub leading-snug min-h-[2.5rem]">
-                    {r.department}
-                  </p>
-                ) : (
-                  <p className="mt-2 text-sm text-text-hint leading-snug min-h-[2.5rem]">
-                    &nbsp;
-                  </p>
-                )}
-              </article>
-            ))}
+                  {/* 합격 체크 아이콘 */}
+                  <span
+                    aria-hidden
+                    className="absolute top-3 right-3 z-10 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white"
+                  >
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </span>
+
+                  <h3 className="relative text-lg md:text-xl font-medium text-[#2C2C2A] tracking-tight">
+                    {r.university}
+                  </h3>
+                  {r.department ? (
+                    <p className="relative mt-2 text-sm text-text-sub leading-snug min-h-[2.5rem]">
+                      {r.department}
+                    </p>
+                  ) : (
+                    <p className="relative mt-2 text-sm text-text-hint leading-snug min-h-[2.5rem]">
+                      &nbsp;
+                    </p>
+                  )}
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
