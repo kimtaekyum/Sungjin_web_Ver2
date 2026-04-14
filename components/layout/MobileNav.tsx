@@ -22,7 +22,7 @@ export default function MobileNav({ open, onClose }: MobileNavProps) {
 
       {/* Drawer */}
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-80 bg-surface shadow-2xl transition-transform duration-300 md:hidden ${
+        className={`fixed top-0 right-0 z-50 h-full w-80 max-w-[85vw] bg-surface shadow-2xl transition-transform duration-300 md:hidden ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >

@@ -14,6 +14,8 @@ export default function ConsultForm() {
     memo: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubjectToggle = (subject: string) => {
     setFormData((prev) => ({
@@ -24,9 +26,42 @@ export default function ConsultForm() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 010-1234-5678 포맷으로 자동 하이픈
+  const handlePhoneChange = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+    let formatted = digits;
+    if (digits.length >= 8) {
+      formatted = `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+    } else if (digits.length >= 4) {
+      formatted = `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    }
+    setFormData({ ...formData, phone: formatted });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (sending) return;
+
+    setError(null);
+    setSending(true);
+    try {
+      const res = await fetch("/api/consultations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data: { ok?: boolean; error?: string } = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.ok) {
+        setError(data.error ?? "상담 신청에 실패했습니다. 잠시 후 다시 시도해주세요.");
+        return;
+      }
+      setSubmitted(true);
+    } catch {
+      setError("네트워크 오류로 신청에 실패했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setSending(false);
+    }
   };
 
   if (submitted) {
@@ -58,10 +93,11 @@ export default function ConsultForm() {
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* 필수 입력 */}
       <div>
-        <label className="block text-sm font-medium text-text mb-1.5">
+        <label htmlFor="consult-parent-name" className="block text-sm font-medium text-text mb-1.5">
           학부모명 <span className="text-danger">*</span>
         </label>
         <input
+          id="consult-parent-name"
           type="text"
           required
           value={formData.parentName}
@@ -72,24 +108,27 @@ export default function ConsultForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-text mb-1.5">
+        <label htmlFor="consult-phone" className="block text-sm font-medium text-text mb-1.5">
           연락처 <span className="text-danger">*</span>
         </label>
         <input
+          id="consult-phone"
           type="tel"
           required
+          inputMode="numeric"
           value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+          onChange={(e) => handlePhoneChange(e.target.value)}
           className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all"
           placeholder="010-0000-0000"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-text mb-1.5">
+        <label htmlFor="consult-grade" className="block text-sm font-medium text-text mb-1.5">
           학생 <span className="text-danger">*</span>
         </label>
         <select
+          id="consult-grade"
           required
           value={formData.grade}
           onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
@@ -104,15 +143,16 @@ export default function ConsultForm() {
 
       {/* 선택 입력 */}
       <div>
-        <label className="block text-sm font-medium text-text mb-2">
+        <span id="consult-subjects-label" className="block text-sm font-medium text-text mb-2">
           관심 과목 <span className="text-text-sub font-normal">(선택)</span>
-        </label>
-        <div className="flex gap-2">
+        </span>
+        <div className="flex gap-2" role="group" aria-labelledby="consult-subjects-label">
           {["국어", "영어", "수학"].map((subject) => (
             <button
               key={subject}
               type="button"
               onClick={() => handleSubjectToggle(subject)}
+              aria-pressed={formData.subjects.includes(subject)}
               className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
                 formData.subjects.includes(subject)
                   ? "bg-primary text-white"
@@ -126,10 +166,11 @@ export default function ConsultForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-text mb-1.5">
+        <label htmlFor="consult-preferred-time" className="block text-sm font-medium text-text mb-1.5">
           상담 희망 시간대 <span className="text-text-sub font-normal">(선택)</span>
         </label>
         <input
+          id="consult-preferred-time"
           type="text"
           value={formData.preferredTime}
           onChange={(e) => setFormData({ ...formData, preferredTime: e.target.value })}
@@ -139,10 +180,11 @@ export default function ConsultForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-text mb-1.5">
+        <label htmlFor="consult-memo" className="block text-sm font-medium text-text mb-1.5">
           메모 <span className="text-text-sub font-normal">(선택)</span>
         </label>
         <textarea
+          id="consult-memo"
           value={formData.memo}
           onChange={(e) => setFormData({ ...formData, memo: e.target.value })}
           rows={3}
@@ -151,8 +193,14 @@ export default function ConsultForm() {
         />
       </div>
 
-      <Button type="submit" variant="primary" className="w-full">
-        상담 신청하기
+      {error && (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-2.5 text-sm text-red-800">
+          {error}
+        </div>
+      )}
+
+      <Button type="submit" variant="primary" className="w-full" disabled={sending}>
+        {sending ? "신청 중..." : "상담 신청하기"}
       </Button>
       <p className="text-xs text-text-sub text-center">
         제출된 개인정보는 상담 목적으로만 사용됩니다.

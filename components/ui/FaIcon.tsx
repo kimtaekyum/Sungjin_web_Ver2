@@ -22,6 +22,11 @@ import {
   faCircleCheck,
   faChartLine,
   faUsers,
+  faArrowsRotate,
+  faSpinner,
+  faXmark,
+  faCircleQuestion,
+  faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
@@ -48,6 +53,11 @@ const iconMap: Record<string, IconDefinition> = {
   "circle-check": faCircleCheck,
   "chart-line": faChartLine,
   users: faUsers,
+  sync: faArrowsRotate,
+  spinner: faSpinner,
+  xmark: faXmark,
+  "circle-question": faCircleQuestion,
+  "chevron-down": faChevronDown,
 };
 
 interface FaIconProps {

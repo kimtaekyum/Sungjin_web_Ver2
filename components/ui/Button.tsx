@@ -11,6 +11,7 @@ interface ButtonProps {
   onClick?: () => void;
   className?: string;
   type?: "button" | "submit";
+  disabled?: boolean;
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
@@ -29,12 +30,16 @@ export default function Button({
   onClick,
   className = "",
   type = "button",
+  disabled = false,
 }: ButtonProps) {
   const base =
-    "inline-flex items-center justify-center rounded-lg px-6 py-3 text-[15px] font-medium transition-all duration-200 cursor-pointer md:text-base";
+    "inline-flex items-center justify-center rounded-lg px-6 py-3 text-[15px] font-medium transition-all duration-200 cursor-pointer md:text-base disabled:opacity-60 disabled:cursor-not-allowed";
   const classes = `${base} ${variantStyles[variant]} ${className}`;
 
   if (href) {
+    if (disabled) {
+      return <span className={classes} aria-disabled="true">{children}</span>;
+    }
     return (
       <Link href={href} className={classes}>
         {children}
@@ -43,7 +48,7 @@ export default function Button({
   }
 
   return (
-    <button type={type} onClick={onClick} className={classes}>
+    <button type={type} onClick={onClick} className={classes} disabled={disabled}>
       {children}
     </button>
   );

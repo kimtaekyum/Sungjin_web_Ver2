@@ -22,7 +22,12 @@ export async function getNotices(): Promise<Notice[]> {
   return data ?? [];
 }
 
-export async function addNotice(notice: { title: string; content: string; pinned: boolean }): Promise<Notice | null> {
+export async function addNotice(notice: {
+  title: string;
+  content: string;
+  pinned: boolean;
+  created_at?: string; // 명시하면 DB default(now()) 대신 사용 (블로그 sync용)
+}): Promise<Notice | null> {
   const { data, error } = await supabase
     .from("notices")
     .insert(notice)

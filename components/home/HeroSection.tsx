@@ -29,7 +29,7 @@ export default function HeroSection() {
                 신월동 30년 전통 입시 전문 학원
               </span>
             </div>
-            <h1 className="text-[32px] font-medium leading-[1.2] text-white md:text-[52px] md:leading-[1.15]">
+            <h1 className="text-[30px] font-medium leading-[1.2] text-white sm:text-[40px] md:text-[52px] md:leading-[1.15]">
               대학 잘 보내는
               <br />
               <span className="text-[#FF6B6B]">1대1 맞춤 첨삭</span> 전문
