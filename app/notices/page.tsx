@@ -97,7 +97,7 @@ export default function NoticesPage() {
                         {body}
                       </p>
                       {sourceUrl && (
-                        <div className="px-5 mt-4">
+                        <div className="px-5 mt-4 flex justify-end">
                           <a
                             href={sourceUrl}
                             target="_blank"
@@ -118,19 +118,6 @@ export default function NoticesPage() {
                               />
                             </svg>
                             네이버 블로그에서 원문 보기
-                            <svg
-                              className="h-3.5 w-3.5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M14 5l7 7m0 0l-7 7m7-7H3"
-                              />
-                            </svg>
                           </a>
                         </div>
                       )}
