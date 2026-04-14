@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ACADEMY_INFO } from "@/lib/constants";
+import { ACADEMY_INFO, NAV_ITEMS } from "@/lib/constants";
 
 export default function Footer() {
   return (
@@ -12,9 +12,9 @@ export default function Footer() {
         </svg>
       </div>
 
-      <div className="relative mx-auto max-w-[1200px] px-4 md:px-6 pt-10 pb-6 md:pt-12">
-        {/* Info row */}
-        <div className="flex flex-col items-start md:flex-row md:items-center md:justify-between gap-4 mb-6">
+      {/* ===== Mobile: slim ===== */}
+      <div className="md:hidden relative mx-auto max-w-[1200px] px-4 pt-10 pb-6">
+        <div className="flex flex-col items-start gap-4 mb-6">
           <Image
             src="/images/logo@2x.png"
             alt={ACADEMY_INFO.name}
@@ -22,7 +22,7 @@ export default function Footer() {
             height={37}
             className="h-7 w-auto shrink-0"
           />
-          <div className="flex flex-col md:flex-row md:items-center md:gap-4 gap-1 text-sm text-white/60">
+          <div className="flex flex-col gap-1 text-sm text-white/60">
             <p>{ACADEMY_INFO.address}</p>
             <a href={`tel:${ACADEMY_INFO.phone}`} className="hover:text-white transition-colors">
               {ACADEMY_INFO.phone}
@@ -31,11 +31,110 @@ export default function Footer() {
           </div>
         </div>
 
+        <div className="border-t border-white/10" />
+
+        <div className="mt-4 flex flex-col gap-2">
+          <p className="text-xs text-white/30">
+            &copy; {new Date().getFullYear()} {ACADEMY_INFO.name}. All rights reserved.
+          </p>
+          <div className="flex gap-4 text-xs text-white/30">
+            <Link href="/privacy" className="hover:text-white/60 transition-colors">
+              개인정보처리방침
+            </Link>
+            <Link href="/admin" className="hover:text-white/60 transition-colors">
+              관리자
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== Desktop: full 4-column ===== */}
+      <div className="hidden md:block relative mx-auto max-w-[1200px] px-6 pt-20 pb-8">
+        {/* Top section */}
+        <div className="grid gap-10 md:grid-cols-4 mb-12">
+          {/* Brand */}
+          <div className="md:col-span-1">
+            <Image
+              src="/images/logo@2x.png"
+              alt={ACADEMY_INFO.name}
+              width={140}
+              height={32}
+              className="h-8 w-auto mb-3"
+            />
+            <p className="text-sm text-white/50 leading-relaxed">
+              {ACADEMY_INFO.slogan}
+            </p>
+          </div>
+
+          {/* 바로가기 */}
+          <div>
+            <h4 className="text-xs font-medium tracking-[0.15em] uppercase text-white/40 mb-4">
+              바로가기
+            </h4>
+            <nav className="flex flex-col gap-2.5">
+              {NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="text-sm text-white/60 hover:text-white transition-colors"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* 학원 정보 */}
+          <div>
+            <h4 className="text-xs font-medium tracking-[0.15em] uppercase text-white/40 mb-4">
+              학원 정보
+            </h4>
+            <div className="space-y-2.5 text-sm text-white/60">
+              <p>{ACADEMY_INFO.address}</p>
+              <p className="text-white/40">{ACADEMY_INFO.addressLegacy}</p>
+              <p>
+                <a href={`tel:${ACADEMY_INFO.phone}`} className="hover:text-white transition-colors">
+                  {ACADEMY_INFO.phone}
+                </a>
+              </p>
+              <p>{ACADEMY_INFO.operatingHours}</p>
+              <p className="text-white/40">{ACADEMY_INFO.registrationNo}</p>
+            </div>
+          </div>
+
+          {/* 상담 */}
+          <div>
+            <h4 className="text-xs font-medium tracking-[0.15em] uppercase text-white/40 mb-4">
+              상담
+            </h4>
+            <p className="text-sm text-white/60 mb-5">
+              전화 또는 카카오톡으로<br />편하게 상담받으세요.
+            </p>
+            <div className="flex flex-col gap-2.5">
+              <a
+                href={`tel:${ACADEMY_INFO.phone}`}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-5 py-2.5 text-sm font-medium hover:bg-white/15 transition-colors"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                전화 상담
+              </a>
+              <a
+                href={ACADEMY_INFO.kakaoLink}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#FEE500] px-5 py-2.5 text-sm font-medium text-[#3C1E1E] hover:bg-[#FDD800] transition-colors"
+              >
+                카카오톡 상담
+              </a>
+            </div>
+          </div>
+        </div>
+
         {/* Divider */}
         <div className="border-t border-white/10" />
 
         {/* Bottom */}
-        <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+        <div className="mt-6 flex items-center justify-between gap-3">
           <p className="text-xs text-white/30">
             &copy; {new Date().getFullYear()} {ACADEMY_INFO.name}. All rights reserved.
           </p>
