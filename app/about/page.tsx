@@ -1,10 +1,20 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Card from "@/components/ui/Card";
 import SectionTitle from "@/components/ui/SectionTitle";
 import FaIcon from "@/components/ui/FaIcon";
 import { ACADEMY_INFO } from "@/lib/constants";
 import { philosophies } from "@/data/philosophy";
 import { strengths } from "@/data/strengths";
+
+const FACILITY_PHOTOS = [
+  { src: "/images/시설사진1.jpg", alt: "성진학원 시설 1" },
+  { src: "/images/시설사진2.jpg", alt: "성진학원 시설 2" },
+  { src: "/images/시설사진3.jpg", alt: "성진학원 시설 3" },
+  { src: "/images/시설사진4.jpg", alt: "성진학원 시설 4" },
+  { src: "/images/시설사진5.jpg", alt: "성진학원 시설 5" },
+  { src: "/images/시설사진6.jpg", alt: "성진학원 시설 6" },
+];
 
 export const metadata: Metadata = {
   title: "학원소개 | 성진학원 - 신월동 30년 입시 전문 학원",
@@ -81,22 +91,28 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 시설 안내 플레이스홀더 */}
+      {/* 시설 안내 */}
       <section className="py-16 md:py-24">
         <div className="mx-auto max-w-[1200px] px-4">
           <SectionTitle title="시설 안내" subtitle="쾌적한 학습 환경을 제공합니다" />
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-            {["상담실", "첨삭실", "자습실", "교실", "복도", "입구"].map((name, i) => (
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
+            {FACILITY_PHOTOS.map((photo, i) => (
               <div
                 key={i}
-                className="rounded-xl bg-surface border border-border/50 aspect-[4/3] flex items-center justify-center"
+                className="group relative overflow-hidden rounded-xl border border-border/50 aspect-[4/3] bg-surface"
               >
-                <div className="text-center">
-                  <div className="text-text-hint mb-2">
-                    <FaIcon name="school" className="w-7 h-7 mx-auto" />
-                  </div>
-                  <p className="text-sm text-text-sub">{name}</p>
-                </div>
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  fill
+                  sizes="(max-width: 768px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <span className="pointer-events-none absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-md bg-white/90 backdrop-blur-sm px-2 py-1 text-xs font-medium text-text shadow-sm opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                  <FaIcon name="school" className="w-3 h-3" />
+                  시설 {i + 1}
+                </span>
               </div>
             ))}
           </div>
