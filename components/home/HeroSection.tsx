@@ -1,6 +1,8 @@
+import Image from "next/image";
 import Button from "@/components/ui/Button";
 import FaIcon from "@/components/ui/FaIcon";
 import { ACADEMY_INFO } from "@/lib/constants";
+import { UNIVERSITY_LOGOS } from "@/data/results";
 
 export default function HeroSection() {
   return (
@@ -57,12 +59,28 @@ export default function HeroSection() {
           <div className="hidden md:block relative">
             <div className="grid grid-cols-2 gap-4">
               {/* Large card top-left */}
-              <div className="rounded-2xl bg-white/10 backdrop-blur-sm p-6 row-span-2 flex flex-col justify-end min-h-[280px]">
-                <div className="text-white/80 mb-3">
+              <div className="relative overflow-hidden rounded-2xl bg-white/10 backdrop-blur-sm p-6 row-span-2 flex flex-col justify-end min-h-[280px]">
+                {/* 서울대 로고 워터마크 */}
+                {UNIVERSITY_LOGOS["서울대"] && (
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 flex items-center justify-center"
+                  >
+                    <Image
+                      src={UNIVERSITY_LOGOS["서울대"].path}
+                      alt=""
+                      width={220}
+                      height={220}
+                      style={{ transform: `scale(${UNIVERSITY_LOGOS["서울대"].scale ?? 1})` }}
+                      className="object-contain w-44 h-44 opacity-20"
+                    />
+                  </div>
+                )}
+                <div className="relative text-white/80 mb-3">
                   <FaIcon name="graduation-cap" className="w-10 h-10" />
                 </div>
-                <p className="text-white font-medium text-lg">2026학년도</p>
-                <p className="text-[#D4A84B] font-medium text-2xl">서울대 합격</p>
+                <p className="relative text-white font-medium text-lg">2026학년도</p>
+                <p className="relative text-[#D4A84B] font-medium text-2xl">서울대 합격</p>
               </div>
               {/* Small card top-right */}
               <div className="rounded-2xl bg-white/10 backdrop-blur-sm p-5 flex flex-col justify-center">
