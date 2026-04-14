@@ -79,8 +79,10 @@ export default function HeroSection() {
                 <div className="relative text-primary mb-3">
                   <FaIcon name="graduation-cap" className="w-10 h-10" />
                 </div>
-                <p className="relative text-text font-medium text-lg">2026학년도</p>
-                <p className="relative text-primary font-semibold text-2xl">서울대 합격</p>
+                <p className="relative whitespace-nowrap">
+                  <span className="text-text font-medium text-base">2026학년도</span>{" "}
+                  <span className="text-primary font-semibold text-xl">서울대 합격</span>
+                </p>
               </div>
               {/* Small card top-right */}
               <div className="rounded-2xl bg-white shadow-lg p-5 flex flex-col justify-center">
