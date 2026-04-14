@@ -24,7 +24,7 @@ export default function ContactPage() {
             subtitle="부담 없이 문의해주세요. 영업일 1일 이내 연락드립니다."
           />
 
-          <div className="grid gap-8 md:grid-cols-2">
+          <div className="grid gap-8 md:grid-cols-2 md:items-stretch">
             {/* 상담 신청 폼 */}
             <div className="rounded-xl bg-surface border border-border/50 p-6 md:p-8">
               <h3 className="text-lg font-medium text-[#444444] mb-6">
@@ -34,8 +34,8 @@ export default function ContactPage() {
             </div>
 
             {/* 오시는 길 */}
-            <div className="space-y-6">
-              <div className="rounded-xl bg-surface border border-border/50 p-6 md:p-8">
+            <div className="flex flex-col gap-6 h-full">
+              <div className="flex-1 rounded-xl bg-surface border border-border/50 p-6 md:p-8">
                 <h3 className="text-lg font-medium text-[#444444] mb-4">
                   오시는 길
                 </h3>
