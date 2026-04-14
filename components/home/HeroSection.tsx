@@ -59,7 +59,7 @@ export default function HeroSection() {
           <div className="hidden md:block relative">
             <div className="grid grid-cols-2 gap-4">
               {/* Large card top-left */}
-              <div className="relative overflow-hidden rounded-2xl bg-white/10 backdrop-blur-sm p-6 row-span-2 flex flex-col justify-end min-h-[280px]">
+              <div className="relative overflow-hidden rounded-2xl bg-white shadow-lg p-6 row-span-2 flex flex-col justify-end min-h-[280px]">
                 {/* 서울대 로고 워터마크 */}
                 {UNIVERSITY_LOGOS["서울대"] && (
                   <div
@@ -76,19 +76,19 @@ export default function HeroSection() {
                     />
                   </div>
                 )}
-                <div className="relative text-white/80 mb-3">
+                <div className="relative text-primary mb-3">
                   <FaIcon name="graduation-cap" className="w-10 h-10" />
                 </div>
-                <p className="relative text-white font-medium text-lg">2026학년도</p>
-                <p className="relative text-[#D4A84B] font-medium text-2xl">서울대 합격</p>
+                <p className="relative text-text font-medium text-lg">2026학년도</p>
+                <p className="relative text-primary font-semibold text-2xl">서울대 합격</p>
               </div>
               {/* Small card top-right */}
-              <div className="rounded-2xl bg-white/10 backdrop-blur-sm p-5 flex flex-col justify-center">
-                <div className="text-white/80 mb-2">
+              <div className="rounded-2xl bg-white shadow-lg p-5 flex flex-col justify-center">
+                <div className="text-primary mb-2">
                   <FaIcon name="pencil" className="w-6 h-6" />
                 </div>
-                <p className="text-white/90 font-medium text-sm">1대1 밀착 첨삭</p>
-                <p className="text-white/60 text-xs mt-1">개념 완벽 흡수 시스템</p>
+                <p className="text-text font-medium text-sm">1대1 밀착 첨삭</p>
+                <p className="text-text-sub text-xs mt-1">개념 완벽 흡수 시스템</p>
               </div>
               {/* Small card bottom-right */}
               <div className="rounded-2xl bg-primary/20 backdrop-blur-sm p-5 flex flex-col justify-center">
