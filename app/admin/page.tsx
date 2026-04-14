@@ -32,6 +32,27 @@ const STATUS_STYLE: Record<ConsultationStatus, string> = {
   declined: "bg-gray-100 text-gray-600",
 };
 
+// 공지 본문에서 "원문 보기: <URL>" 블록을 분리/합치는 헬퍼
+// - splitSourceUrl: 저장된 content → 표시용 body와 sourceUrl 분리 (수정 진입 시 사용)
+// - mergeSourceUrl: body + sourceUrl → 저장용 content (제출 시 사용)
+const SOURCE_URL_REGEX = /\n*원문\s*보기\s*[:：]\s*(https?:\/\/\S+)\s*$/;
+
+function splitSourceUrl(content: string): { body: string; sourceUrl: string } {
+  const match = content.match(SOURCE_URL_REGEX);
+  if (!match) return { body: content, sourceUrl: "" };
+  return {
+    body: content.replace(SOURCE_URL_REGEX, "").trimEnd(),
+    sourceUrl: match[1],
+  };
+}
+
+function mergeSourceUrl(body: string, sourceUrl: string): string {
+  const trimmed = body.trimEnd();
+  const url = sourceUrl.trim();
+  if (!url) return trimmed;
+  return trimmed ? `${trimmed}\n\n원문 보기: ${url}` : `원문 보기: ${url}`;
+}
+
 export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
@@ -43,7 +64,8 @@ export default function AdminPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [form, setForm] = useState({ title: "", content: "", pinned: false });
+  const [form, setForm] = useState({ title: "", content: "", pinned: false, sourceUrl: "" });
+  const [urlError, setUrlError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [faqOpen, setFaqOpen] = useState(false);
@@ -102,19 +124,35 @@ export default function AdminPage() {
     e.preventDefault();
     if (!form.title.trim()) return;
 
+    // URL 검증: 비어있으면 OK, 있으면 http(s)://로 시작해야 함
+    const url = form.sourceUrl.trim();
+    if (url && !/^https?:\/\/\S+$/.test(url)) {
+      setUrlError("http:// 또는 https://로 시작하는 유효한 URL을 입력해주세요.");
+      return;
+    }
+    setUrlError(null);
+
+    const payload = {
+      title: form.title,
+      content: mergeSourceUrl(form.content, url),
+      pinned: form.pinned,
+    };
+
     if (editingId) {
-      await updateNotice(editingId, form);
+      await updateNotice(editingId, payload);
     } else {
-      await addNotice(form);
+      await addNotice(payload);
     }
     await loadNotices();
-    setForm({ title: "", content: "", pinned: false });
+    setForm({ title: "", content: "", pinned: false, sourceUrl: "" });
     setEditingId(null);
   };
 
   const handleEdit = (notice: Notice) => {
     setEditingId(notice.id);
-    setForm({ title: notice.title, content: notice.content, pinned: notice.pinned });
+    const { body, sourceUrl } = splitSourceUrl(notice.content);
+    setForm({ title: notice.title, content: body, pinned: notice.pinned, sourceUrl });
+    setUrlError(null);
   };
 
   const handleDelete = async (id: number) => {
@@ -125,7 +163,8 @@ export default function AdminPage() {
 
   const handleCancel = () => {
     setEditingId(null);
-    setForm({ title: "", content: "", pinned: false });
+    setForm({ title: "", content: "", pinned: false, sourceUrl: "" });
+    setUrlError(null);
   };
 
   const handleSync = async () => {
@@ -427,6 +466,32 @@ export default function AdminPage() {
                       className="w-full rounded-lg border border-border bg-bg px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 resize-none transition-all"
                       placeholder="공지 내용을 입력하세요"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-text mb-1.5">
+                      원문 URL <span className="text-text-hint font-normal">(선택)</span>
+                    </label>
+                    <input
+                      type="url"
+                      value={form.sourceUrl}
+                      onChange={(e) => {
+                        setForm({ ...form, sourceUrl: e.target.value });
+                        if (urlError) setUrlError(null);
+                      }}
+                      className={`w-full rounded-lg border bg-bg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
+                        urlError
+                          ? "border-primary focus:border-primary focus:ring-primary/10"
+                          : "border-border focus:border-primary focus:ring-primary/10"
+                      }`}
+                      placeholder="https://blog.naver.com/..."
+                    />
+                    {urlError ? (
+                      <p className="text-xs text-primary mt-1">{urlError}</p>
+                    ) : (
+                      <p className="text-xs text-text-hint mt-1">
+                        입력하면 공지 하단에 <span className="font-medium">&ldquo;원문 보기&rdquo;</span> 버튼이 자동으로 표시됩니다.
+                      </p>
+                    )}
                   </div>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
