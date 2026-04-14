@@ -55,12 +55,3 @@ html {
 .animate-scroll-right {
   animation: scroll-right 60s linear infinite;
 }
-
-/* Hero admission ticker marquee */
-@keyframes hero-marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.animate-hero-marquee {
-  animation: hero-marquee 35s linear infinite;
-}
