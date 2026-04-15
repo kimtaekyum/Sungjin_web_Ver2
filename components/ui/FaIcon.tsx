@@ -27,6 +27,7 @@ import {
   faXmark,
   faCircleQuestion,
   faChevronDown,
+  faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
@@ -58,6 +59,7 @@ const iconMap: Record<string, IconDefinition> = {
   xmark: faXmark,
   "circle-question": faCircleQuestion,
   "chevron-down": faChevronDown,
+  "right-from-bracket": faRightFromBracket,
 };
 
 interface FaIconProps {

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import FaIcon from "@/components/ui/FaIcon";
+import { supabase } from "@/lib/supabase";
 import { getNotices, addNotice, updateNotice, deleteNotice, type Notice } from "@/lib/notices";
 import { getEvents, addEvent, updateEvent, deleteEvent } from "@/lib/events";
 import {
@@ -13,8 +14,6 @@ import {
   type ConsultationStatus,
 } from "@/lib/consultations";
 import type { AcademyEvent } from "@/data/events";
-
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "0000";
 
 type Tab = "notices" | "events" | "consultations";
 
@@ -54,9 +53,12 @@ function mergeSourceUrl(body: string, sourceUrl: string): string {
 }
 
 export default function AdminPage() {
-  const [authenticated, setAuthenticated] = useState(false);
+  // Supabase Auth 세션 기반. null = 미확인(초기 로딩), false = 비로그인, true = 로그인됨.
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loggingIn, setLoggingIn] = useState(false);
 
   const [activeTab, setActiveTab] = useState<Tab>("notices");
 
@@ -101,22 +103,42 @@ export default function AdminPage() {
     setLoadingConsultations(false);
   }, []);
 
+  // 초기 진입: 저장된 세션 확인 + 이후 로그인/로그아웃 이벤트 구독
   useEffect(() => {
-    if (authenticated) {
+    supabase.auth.getSession().then(({ data }) => {
+      setAuthenticated(!!data.session);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthenticated(!!session);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (authenticated === true) {
       loadNotices();
       loadEvents();
       loadConsultations();
     }
   }, [authenticated, loadNotices, loadEvents, loadConsultations]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      setAuthenticated(true);
-      setPasswordError(false);
-    } else {
-      setPasswordError(true);
+    setLoginError(null);
+    setLoggingIn(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoggingIn(false);
+    if (error) {
+      setLoginError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      return;
     }
+    // onAuthStateChange가 authenticated를 true로 바꿔줌
+    setPassword("");
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    // onAuthStateChange가 authenticated를 false로 바꿔줌
   };
 
   // ===== Notice handlers =====
@@ -276,6 +298,15 @@ export default function AdminPage() {
 
   const newConsultationCount = consultations.filter((c) => c.status === "new").length;
 
+  // 초기 세션 확인 중 — 로그인 폼이 깜빡 보이는 것을 방지
+  if (authenticated === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-bg">
+        <FaIcon name="spinner" className="w-6 h-6 text-text-hint animate-spin" />
+      </div>
+    );
+  }
+
   // Login screen
   if (!authenticated) {
     return (
@@ -286,25 +317,49 @@ export default function AdminPage() {
             <p className="text-sm text-text-sub text-center mb-6">성진학원 관리자 페이지</p>
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
+                <label className="block text-sm font-medium text-text mb-1.5">이메일</label>
+                <input
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); if (loginError) setLoginError(null); }}
+                  className={`w-full rounded-lg border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all ${
+                    loginError ? "border-danger focus:border-danger" : "border-border focus:border-primary"
+                  }`}
+                  placeholder="admin@example.com"
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-text mb-1.5">비밀번호</label>
                 <input
                   type="password"
+                  required
+                  autoComplete="current-password"
                   value={password}
-                  onChange={(e) => { setPassword(e.target.value); setPasswordError(false); }}
+                  onChange={(e) => { setPassword(e.target.value); if (loginError) setLoginError(null); }}
                   className={`w-full rounded-lg border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all ${
-                    passwordError ? "border-danger focus:border-danger" : "border-border focus:border-primary"
+                    loginError ? "border-danger focus:border-danger" : "border-border focus:border-primary"
                   }`}
                   placeholder="비밀번호를 입력하세요"
                 />
-                {passwordError && (
-                  <p className="mt-1.5 text-xs text-danger">비밀번호가 올바르지 않습니다.</p>
+                {loginError && (
+                  <p className="mt-1.5 text-xs text-danger">{loginError}</p>
                 )}
               </div>
               <button
                 type="submit"
-                className="w-full rounded-lg bg-primary text-white py-3 text-sm font-medium hover:bg-[#8A1519] transition-colors cursor-pointer"
+                disabled={loggingIn}
+                className="w-full rounded-lg bg-primary text-white py-3 text-sm font-medium hover:bg-[#8A1519] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
               >
-                로그인
+                {loggingIn ? (
+                  <>
+                    <FaIcon name="spinner" className="w-3.5 h-3.5 animate-spin" />
+                    로그인 중...
+                  </>
+                ) : (
+                  "로그인"
+                )}
               </button>
             </form>
           </div>
@@ -364,6 +419,15 @@ export default function AdminPage() {
               <span className="md:hidden">← 홈</span>
               <span className="hidden md:inline">홈으로 돌아가기</span>
             </Link>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-[13px] md:text-sm text-text-sub hover:text-primary hover:border-primary/30 transition-colors cursor-pointer"
+              title="로그아웃"
+            >
+              <FaIcon name="right-from-bracket" className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">로그아웃</span>
+            </button>
           </div>
         </div>
 

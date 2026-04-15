@@ -18,6 +18,12 @@ export interface Consultation {
   created_at: string;
 }
 
+/**
+ * 아래 헬퍼들은 관리자(로그인 세션) 브라우저에서 호출된다.
+ * RLS: authenticated 역할만 SELECT/UPDATE/DELETE 가능.
+ * anon INSERT는 /api/consultations 라우트에서 service_role로 직접 처리한다.
+ */
+
 export async function getConsultations(): Promise<Consultation[]> {
   const { data, error } = await supabase
     .from("consultations")
@@ -29,36 +35,6 @@ export async function getConsultations(): Promise<Consultation[]> {
     return [];
   }
   return data ?? [];
-}
-
-export async function addConsultation(consultation: {
-  parent_name: string;
-  phone: string;
-  phone_display: string;
-  grade: "초등" | "중등" | "고등";
-  subjects?: string[];
-  preferred_time?: string | null;
-  memo?: string | null;
-}): Promise<Consultation | null> {
-  const { data, error } = await supabase
-    .from("consultations")
-    .insert({
-      parent_name: consultation.parent_name,
-      phone: consultation.phone,
-      phone_display: consultation.phone_display,
-      grade: consultation.grade,
-      subjects: consultation.subjects ?? [],
-      preferred_time: consultation.preferred_time ?? null,
-      memo: consultation.memo ?? null,
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error("상담 신청 등록 실패:", error);
-    return null;
-  }
-  return data;
 }
 
 export async function updateConsultationStatus(
@@ -88,26 +64,4 @@ export async function deleteConsultation(id: number): Promise<boolean> {
     return false;
   }
   return true;
-}
-
-/**
- * Rate-limit 헬퍼: 같은 전화번호(정규화된 값)로 최근 windowSec 초 내에
- * 몇 건 제출됐는지 센다. 봇/중복 클릭 방어용.
- */
-export async function countRecentByPhone(
-  phone: string,
-  windowSec: number
-): Promise<number> {
-  const since = new Date(Date.now() - windowSec * 1000).toISOString();
-  const { count, error } = await supabase
-    .from("consultations")
-    .select("id", { count: "exact", head: true })
-    .eq("phone", phone)
-    .gte("created_at", since);
-
-  if (error) {
-    console.error("rate-limit 조회 실패:", error);
-    return 0;
-  }
-  return count ?? 0;
 }

@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { fetchLatestBlogPosts } from "@/lib/blogFeed";
-import { getProcessedIds, markProcessed } from "@/lib/processedPosts";
 import { summarizeBlogPost } from "@/lib/summarize";
-import { addNotice } from "@/lib/notices";
+import { supabaseAdmin } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +25,52 @@ interface SyncResult {
   errors: string[];
 }
 
+/**
+ * 서버 전용 DB 헬퍼. RLS 잠금 후에는 service_role 키로만 접근 가능하므로
+ * 기존 lib/* 헬퍼(anon 싱글턴 사용) 대신 여기서 직접 수행한다.
+ */
+async function getProcessedIds(): Promise<Set<string>> {
+  const { data, error } = await supabaseAdmin
+    .from("processed_blog_posts")
+    .select("id");
+  if (error) {
+    console.error("processed_blog_posts 조회 실패:", error);
+    return new Set();
+  }
+  return new Set((data ?? []).map((row) => row.id as string));
+}
+
+async function markProcessed(
+  id: string,
+  title: string,
+  noticeId: number | null
+): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from("processed_blog_posts")
+    .insert({ id, title, notice_id: noticeId });
+  if (error) {
+    console.error("processed_blog_posts 기록 실패:", error);
+  }
+}
+
+async function addNoticeAdmin(notice: {
+  title: string;
+  content: string;
+  pinned: boolean;
+  created_at?: string;
+}): Promise<{ id: number } | null> {
+  const { data, error } = await supabaseAdmin
+    .from("notices")
+    .insert(notice)
+    .select("id")
+    .single();
+  if (error) {
+    console.error("공지사항 등록 실패:", error);
+    return null;
+  }
+  return data;
+}
+
 /** 동기화 핵심 로직 — POST(수동)·GET(cron) 양쪽에서 공유 */
 async function runSync(): Promise<SyncResult> {
   const posts = await fetchLatestBlogPosts({ fresh: true });
@@ -43,7 +88,7 @@ async function runSync(): Promise<SyncResult> {
       const summary = await summarizeBlogPost(post.title, sourceContent);
       const fullContent = `${summary.content}\n\n원문 보기: ${post.link}`;
 
-      const created = await addNotice({
+      const created = await addNoticeAdmin({
         title: summary.title,
         content: fullContent,
         pinned: false,

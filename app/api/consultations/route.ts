@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { addConsultation, countRecentByPhone } from "@/lib/consultations";
+import { supabaseAdmin } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +28,27 @@ function normalizePhone(input: string): string | null {
 
 function formatPhoneDisplay(digits: string): string {
   return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+
+/**
+ * Rate-limit: RLS로 anon SELECT가 막혀 있으므로 service_role로 조회한다.
+ * 같은 전화번호(정규화)로 최근 windowSec 초 내 제출 건수.
+ */
+async function countRecentByPhone(
+  phone: string,
+  windowSec: number
+): Promise<number> {
+  const since = new Date(Date.now() - windowSec * 1000).toISOString();
+  const { count, error } = await supabaseAdmin
+    .from("consultations")
+    .select("id", { count: "exact", head: true })
+    .eq("phone", phone)
+    .gte("created_at", since);
+  if (error) {
+    console.error("rate-limit 조회 실패:", error);
+    return 0;
+  }
+  return count ?? 0;
 }
 
 export async function POST(request: Request) {
@@ -92,7 +113,11 @@ export async function POST(request: Request) {
   }
 
   // ----- 3. 저장 -----
-  const created = await addConsultation({
+  // 주의: `.select().single()`을 붙이면 INSERT 후 RETURNING으로 행을 다시 읽는데,
+  // 그때 SELECT RLS 정책이 평가된다. SELECT 정책은 authenticated 전용이므로
+  // anon/service_role 경로에서 `new row violates RLS` 에러로 둔갑할 수 있다.
+  // id는 응답에서 쓰이지 않으므로 RETURNING을 생략한다.
+  const { error } = await supabaseAdmin.from("consultations").insert({
     parent_name: parentNameRaw,
     phone: normalizedPhone,
     phone_display: phoneDisplay,
@@ -102,7 +127,8 @@ export async function POST(request: Request) {
     memo,
   });
 
-  if (!created) {
+  if (error) {
+    console.error("상담 신청 저장 실패:", error);
     return NextResponse.json(
       { error: "상담 신청 저장에 실패했습니다. 잠시 후 다시 시도해주세요." },
       { status: 500 }
@@ -110,5 +136,5 @@ export async function POST(request: Request) {
   }
 
   // Phase 4에서 이 지점에 알림톡 발송 로직 추가
-  return NextResponse.json({ ok: true, id: created.id });
+  return NextResponse.json({ ok: true });
 }
