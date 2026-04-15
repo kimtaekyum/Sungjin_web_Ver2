@@ -27,10 +27,18 @@ function pubDateToFullISO(pubDate: string): string {
   return d.toISOString();
 }
 
-export async function fetchLatestBlogPosts(): Promise<BlogPost[]> {
+interface FetchOptions {
+  /** true로 주면 Next.js 캐시를 우회하고 항상 최신 RSS를 가져옴. 동기화 버튼·cron용. */
+  fresh?: boolean;
+}
+
+export async function fetchLatestBlogPosts(
+  opts: FetchOptions = {}
+): Promise<BlogPost[]> {
   try {
     const res = await fetch(RSS_URL, {
-      next: { revalidate: 3600 }, // 1 hour cache
+      // 동기화 경로(fresh=true)에선 캐시 우회, 홈 화면은 1시간 캐시 유지
+      ...(opts.fresh ? { cache: "no-store" as const } : { next: { revalidate: 3600 } }),
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; SeongjinBot/1.0)",
       },
