@@ -54,17 +54,22 @@ function generateExamEvents(year: number): (AcademyEvent & { color: string })[] 
 }
 
 export default function EventCalendar() {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [today, setToday] = useState<Date | null>(null);
+  const [currentDate, setCurrentDate] = useState<Date | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [allEvents, setAllEvents] = useState<AcademyEvent[]>([]);
 
   useEffect(() => {
+    const now = new Date();
+    setToday(now);
+    setCurrentDate(now);
     getEvents().then(setAllEvents);
   }, []);
 
-  const year = currentDate.getFullYear();
+  const year = currentDate?.getFullYear() ?? 0;
 
   const eventsWithColor = useMemo(() => {
+    if (!currentDate) return [];
     const exams = [
       ...generateExamEvents(year - 1),
       ...generateExamEvents(year),
@@ -75,25 +80,30 @@ export default function EventCalendar() {
       color: RAINBOW[idx % RAINBOW.length],
     }));
     return [...exams, ...supabaseEvents];
-  }, [allEvents, year]);
+  }, [allEvents, year, currentDate]);
 
   const ddayText = useMemo(() => {
-    const now = new Date();
-    let csat = getCsatDate(now.getFullYear());
-    if (csat < now) csat = getCsatDate(now.getFullYear() + 1);
+    if (!today) return "";
+    let csat = getCsatDate(today.getFullYear());
+    if (csat < today) csat = getCsatDate(today.getFullYear() + 1);
     const diff = Math.ceil(
-      (csat.getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) /
+      (csat.getTime() - new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()) /
         86400000
     );
     const csatYear = csat.getFullYear();
     if (diff === 0) return `${csatYear}학년도 수능 D-Day!`;
     return `${csatYear + 1}학년도 수능 D-${diff}`;
-  }, []);
+  }, [today]);
+
+  if (!currentDate || !today) {
+    return (
+      <div className="rounded-xl bg-surface border border-border/50 p-6 md:p-7 h-full min-h-[420px]" />
+    );
+  }
 
   const month = currentDate.getMonth();
   const firstDay = new Date(year, month, 1).getDay();
   const lastDate = new Date(year, month + 1, 0).getDate();
-  const today = new Date();
   const todayStr = formatDateStr(today.getFullYear(), today.getMonth(), today.getDate());
 
   const getEventsForDate = (dateStr: string): (AcademyEvent & { color: string })[] =>
