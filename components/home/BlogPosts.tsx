@@ -43,9 +43,9 @@ export default async function BlogPosts() {
                 href={post.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between gap-3 py-3 group"
+                className="flex items-center justify-between gap-3 py-3 group min-w-0"
               >
-                <span className="text-sm text-text group-hover:text-primary transition-colors truncate flex-1">
+                <span className="text-sm text-text group-hover:text-primary transition-colors truncate flex-1 min-w-0">
                   {post.title}
                 </span>
                 <span className="text-xs text-text-hint shrink-0">

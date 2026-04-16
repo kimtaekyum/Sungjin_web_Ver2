@@ -196,9 +196,9 @@ export default function EventCalendar() {
         {selectedDate && selectedEvents.length > 0 ? (
           <ul className="space-y-1.5">
             {selectedEvents.map((ev) => (
-              <li key={ev.id} className="flex items-center gap-2 bg-bg px-2 py-1.5 rounded">
+              <li key={ev.id} className="flex items-center gap-2 bg-bg px-2 py-1.5 rounded min-w-0">
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ background: ev.color }} />
-                <span className="text-sm text-text font-medium flex-1 truncate">{ev.title}</span>
+                <span className="text-sm text-text font-medium flex-1 truncate min-w-0">{ev.title}</span>
                 {ev.endDate && ev.endDate !== ev.startDate && (
                   <span className="text-xs text-text-hint">
                     {parseInt(ev.startDate.split("-")[1])}/{parseInt(ev.startDate.split("-")[2])} ~{" "}
@@ -219,10 +219,10 @@ export default function EventCalendar() {
                     )}/${parseInt(ev.endDate.split("-")[2])}`
                   : `${parseInt(sd[1])}/${parseInt(sd[2])}`;
               return (
-                <li key={ev.id} className="flex items-center gap-2 px-2 py-1.5 rounded">
+                <li key={ev.id} className="flex items-center gap-2 px-2 py-1.5 rounded min-w-0">
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ background: ev.color }} />
-                  <span className="text-xs font-medium text-text-sub min-w-[60px]">{label}</span>
-                  <span className="text-sm text-text flex-1 truncate">{ev.title}</span>
+                  <span className="text-xs font-medium text-text-sub shrink-0 min-w-[60px]">{label}</span>
+                  <span className="text-sm text-text flex-1 truncate min-w-0">{ev.title}</span>
                 </li>
               );
             })}
