@@ -384,7 +384,7 @@ export default function AdminPage() {
 
   // Admin dashboard
   return (
-    <div className="min-h-screen bg-bg pt-16 md:pt-[72px]">
+    <div className="min-h-screen bg-bg md:pt-[72px]">
       {/* Admin header */}
       <div className="bg-surface border-b border-border/50">
         <div className="mx-auto max-w-[1200px] px-4 md:px-6 py-5 md:py-0 md:h-20 flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-3">
@@ -423,8 +423,8 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-[13px] md:text-sm text-text-sub hover:text-primary hover:border-primary/30 transition-colors cursor-pointer"
-              title="로그아웃"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-[13px] md:text-sm text-text-sub hover:text-primary hover:border-primary/30 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              aria-label="로그아웃"
             >
               <FaIcon name="right-from-bracket" className="w-3.5 h-3.5" />
               <span className="hidden md:inline">로그아웃</span>
@@ -635,15 +635,15 @@ export default function AdminPage() {
                         <div className="flex gap-1 shrink-0">
                           <button
                             onClick={() => handleEdit(notice)}
-                            className="p-2 rounded-lg text-text-hint hover:text-primary hover:bg-bg transition-colors cursor-pointer"
-                            title="수정"
+                            className="p-2 rounded-lg text-text-hint hover:text-primary hover:bg-bg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                            aria-label="공지사항 수정"
                           >
                             <FaIcon name="pencil" className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleDelete(notice.id)}
-                            className="p-2 rounded-lg text-text-hint hover:text-danger hover:bg-[#FDF2F2] transition-colors cursor-pointer"
-                            title="삭제"
+                            className="p-2 rounded-lg text-text-hint hover:text-danger hover:bg-[#FDF2F2] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                            aria-label="공지사항 삭제"
                           >
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -753,15 +753,15 @@ export default function AdminPage() {
                         <div className="flex gap-1 shrink-0">
                           <button
                             onClick={() => handleEventEdit(ev)}
-                            className="p-2 rounded-lg text-text-hint hover:text-primary hover:bg-bg transition-colors cursor-pointer"
-                            title="수정"
+                            className="p-2 rounded-lg text-text-hint hover:text-primary hover:bg-bg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                            aria-label="일정 수정"
                           >
                             <FaIcon name="pencil" className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleEventDelete(ev.id)}
-                            className="p-2 rounded-lg text-text-hint hover:text-danger hover:bg-[#FDF2F2] transition-colors cursor-pointer"
-                            title="삭제"
+                            className="p-2 rounded-lg text-text-hint hover:text-danger hover:bg-[#FDF2F2] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                            aria-label="일정 삭제"
                           >
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -864,8 +864,7 @@ export default function AdminPage() {
                         </select>
                         <button
                           onClick={() => handleConsultationDelete(c.id)}
-                          className="p-2 rounded-lg text-text-hint hover:text-danger hover:bg-[#FDF2F2] transition-colors cursor-pointer"
-                          title="삭제"
+                          className="p-2 rounded-lg text-text-hint hover:text-danger hover:bg-[#FDF2F2] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                           aria-label="상담 삭제"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

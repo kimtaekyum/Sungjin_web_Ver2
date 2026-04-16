@@ -6,7 +6,7 @@ import { UNIVERSITY_LOGOS } from "@/data/results";
 
 export default function HeroSection() {
   return (
-    <section className="relative bg-[#2C2C2A] overflow-hidden">
+    <section className="relative bg-[#2C2C2A] overflow-hidden -mt-16 md:mt-0">
       {/* Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-br from-[#2C2C2A] via-[#3a3a38] to-[#2C2C2A]" />

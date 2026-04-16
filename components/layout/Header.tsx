@@ -19,10 +19,10 @@ export default function Header() {
   return (
     <>
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-surface/95 backdrop-blur-md shadow-sm ${
         scrolled
-          ? "bg-surface/95 backdrop-blur-md shadow-sm translate-y-0 opacity-100"
-          : "-translate-y-full opacity-0 pointer-events-none"
+          ? ""
+          : "md:bg-transparent md:shadow-none md:-translate-y-full md:opacity-0 md:pointer-events-none"
       }`}
     >
       {/* Top bar (desktop only) */}
@@ -54,7 +54,7 @@ export default function Header() {
             width={160}
             height={37}
             className={`h-8 w-auto md:h-9 transition-all duration-300 ${
-              scrolled ? "" : "brightness-0 invert"
+              scrolled ? "" : "md:brightness-0 md:invert"
             }`}
             priority
           />
@@ -90,7 +90,7 @@ export default function Header() {
           aria-label="메뉴 열기"
         >
           <svg
-            className={`h-6 w-6 transition-colors ${scrolled ? "text-text" : "text-white"}`}
+            className="h-6 w-6 text-text"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

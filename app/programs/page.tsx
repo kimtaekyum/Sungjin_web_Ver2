@@ -128,30 +128,30 @@ export default function ProgramsPage() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-primary text-white">
-                    <th className="px-6 py-4 text-left text-sm font-medium">과정</th>
-                    <th className="px-6 py-4 text-center text-sm font-medium">수학</th>
-                    <th className="px-6 py-4 text-center text-sm font-medium">영어</th>
-                    <th className="px-6 py-4 text-center text-sm font-medium">국어</th>
+                    <th className="px-3 py-3 text-left text-xs font-medium md:px-6 md:py-4 md:text-sm">과정</th>
+                    <th className="px-3 py-3 text-center text-xs font-medium md:px-6 md:py-4 md:text-sm">수학</th>
+                    <th className="px-3 py-3 text-center text-xs font-medium md:px-6 md:py-4 md:text-sm">영어</th>
+                    <th className="px-3 py-3 text-center text-xs font-medium md:px-6 md:py-4 md:text-sm">국어</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   <tr>
-                    <td className="px-6 py-5 text-sm font-medium text-[#444444]">고등</td>
-                    <td className="px-6 py-5 text-sm text-center text-text-sub">36만</td>
-                    <td className="px-6 py-5 text-sm text-center text-text-sub">36만</td>
-                    <td className="px-6 py-5 text-sm text-center text-text-sub">26만</td>
+                    <td className="px-3 py-4 text-xs font-medium text-[#444444] md:px-6 md:py-5 md:text-sm">고등</td>
+                    <td className="px-3 py-4 text-xs text-center text-text-sub md:px-6 md:py-5 md:text-sm">36만</td>
+                    <td className="px-3 py-4 text-xs text-center text-text-sub md:px-6 md:py-5 md:text-sm">36만</td>
+                    <td className="px-3 py-4 text-xs text-center text-text-sub md:px-6 md:py-5 md:text-sm">26만</td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-5 text-sm font-medium text-[#444444]">중등</td>
-                    <td className="px-6 py-5 text-sm text-center text-text-sub">26만</td>
-                    <td className="px-6 py-5 text-sm text-center text-text-sub">26만</td>
-                    <td className="px-6 py-5 text-sm text-center text-text-sub">15만</td>
+                    <td className="px-3 py-4 text-xs font-medium text-[#444444] md:px-6 md:py-5 md:text-sm">중등</td>
+                    <td className="px-3 py-4 text-xs text-center text-text-sub md:px-6 md:py-5 md:text-sm">26만</td>
+                    <td className="px-3 py-4 text-xs text-center text-text-sub md:px-6 md:py-5 md:text-sm">26만</td>
+                    <td className="px-3 py-4 text-xs text-center text-text-sub md:px-6 md:py-5 md:text-sm">15만</td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-5 text-sm font-medium text-[#444444]">초등</td>
-                    <td className="px-6 py-5 text-sm text-center text-text-sub">23만</td>
-                    <td className="px-6 py-5 text-sm text-center text-text-sub">23만</td>
-                    <td className="px-6 py-5 text-sm text-center text-text-sub">-</td>
+                    <td className="px-3 py-4 text-xs font-medium text-[#444444] md:px-6 md:py-5 md:text-sm">초등</td>
+                    <td className="px-3 py-4 text-xs text-center text-text-sub md:px-6 md:py-5 md:text-sm">23만</td>
+                    <td className="px-3 py-4 text-xs text-center text-text-sub md:px-6 md:py-5 md:text-sm">23만</td>
+                    <td className="px-3 py-4 text-xs text-center text-text-sub md:px-6 md:py-5 md:text-sm">-</td>
                   </tr>
                 </tbody>
               </table>

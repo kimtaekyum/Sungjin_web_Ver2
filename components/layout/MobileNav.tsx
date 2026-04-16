@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { NAV_ITEMS, ACADEMY_INFO } from "@/lib/constants";
@@ -10,12 +11,28 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ open, onClose }: MobileNavProps) {
+  const [mounted, setMounted] = useState(false);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setMounted(true);
+      const raf = requestAnimationFrame(() => setShown(true));
+      return () => cancelAnimationFrame(raf);
+    }
+    setShown(false);
+    const t = setTimeout(() => setMounted(false), 300);
+    return () => clearTimeout(t);
+  }, [open]);
+
+  if (!mounted) return null;
+
   return (
     <>
       {/* Backdrop */}
       <div
         className={`fixed inset-0 z-50 bg-[#2C2C2A]/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
-          open ? "opacity-100" : "opacity-0 pointer-events-none"
+          shown ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
       />
@@ -23,7 +40,7 @@ export default function MobileNav({ open, onClose }: MobileNavProps) {
       {/* Drawer */}
       <div
         className={`fixed top-0 right-0 z-50 h-full w-80 max-w-[85vw] bg-surface shadow-2xl transition-transform duration-300 md:hidden ${
-          open ? "translate-x-0" : "translate-x-full"
+          shown ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex items-center justify-between p-5 border-b border-border/50">

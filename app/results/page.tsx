@@ -81,23 +81,23 @@ export default function ResultsPage() {
             title="중등 성적 향상 사례"
             subtitle="눈에 보이는 성적 변화"
           />
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 grid-cols-2 md:gap-5 lg:grid-cols-3">
             {scoreImprovements.map((s, i) => (
               <div
                 key={i}
-                className="rounded-xl bg-bg p-6 flex items-center gap-4"
+                className="rounded-xl bg-bg p-4 flex flex-col items-start gap-3 md:flex-row md:items-center md:gap-4 md:p-6"
               >
-                <span className="inline-block rounded-full bg-[#FDF2F2] px-3 py-1.5 text-sm font-medium text-primary">
+                <span className="inline-block rounded-full bg-[#FDF2F2] px-2.5 py-1 text-xs font-medium text-primary md:px-3 md:py-1.5 md:text-sm">
                   {s.subject}
                 </span>
-                <div className="flex items-center gap-3 flex-1">
-                  <span className="text-lg font-medium text-text-sub">
+                <div className="flex items-center gap-2 md:gap-3 md:flex-1">
+                  <span className="text-base font-medium text-text-sub md:text-lg">
                     {s.before}
                   </span>
-                  <svg className="h-5 w-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-4 w-4 text-success shrink-0 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
-                  <span className="text-lg font-medium text-success">
+                  <span className="text-base font-medium text-success md:text-lg">
                     {s.after}
                   </span>
                 </div>

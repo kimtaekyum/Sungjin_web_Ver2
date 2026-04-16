@@ -27,17 +27,17 @@ export default function Footer() {
             <a href={`tel:${ACADEMY_INFO.phone}`} className="hover:text-white transition-colors">
               {ACADEMY_INFO.phone}
             </a>
-            <p className="text-white/40 text-xs">{ACADEMY_INFO.registrationNo}</p>
+            <p className="text-white/60 text-xs">{ACADEMY_INFO.registrationNo}</p>
           </div>
         </div>
 
         <div className="border-t border-white/10" />
 
         <div className="mt-4 flex flex-col gap-2">
-          <p className="text-xs text-white/30">
+          <p className="text-xs text-white/60">
             &copy; {new Date().getFullYear()} {ACADEMY_INFO.name}. All rights reserved.
           </p>
-          <div className="flex gap-4 text-xs text-white/30">
+          <div className="flex gap-4 text-xs text-white/60">
             <Link href="/privacy" className="hover:text-white/60 transition-colors">
               개인정보처리방침
             </Link>
@@ -91,14 +91,14 @@ export default function Footer() {
             </h4>
             <div className="space-y-2.5 text-sm text-white/60">
               <p>{ACADEMY_INFO.address}</p>
-              <p className="text-white/40">{ACADEMY_INFO.addressLegacy}</p>
+              <p className="text-white/60">{ACADEMY_INFO.addressLegacy}</p>
               <p>
                 <a href={`tel:${ACADEMY_INFO.phone}`} className="hover:text-white transition-colors">
                   {ACADEMY_INFO.phone}
                 </a>
               </p>
               <p>{ACADEMY_INFO.operatingHours}</p>
-              <p className="text-white/40">{ACADEMY_INFO.registrationNo}</p>
+              <p className="text-white/60">{ACADEMY_INFO.registrationNo}</p>
             </div>
           </div>
 
@@ -135,10 +135,10 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="mt-6 flex items-center justify-between gap-3">
-          <p className="text-xs text-white/30">
+          <p className="text-xs text-white/60">
             &copy; {new Date().getFullYear()} {ACADEMY_INFO.name}. All rights reserved.
           </p>
-          <div className="flex gap-4 text-xs text-white/30">
+          <div className="flex gap-4 text-xs text-white/60">
             <Link href="/privacy" className="hover:text-white/60 transition-colors">
               개인정보처리방침
             </Link>

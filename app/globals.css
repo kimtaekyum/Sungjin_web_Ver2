@@ -114,3 +114,9 @@ html {
 .animate-scroll-right {
   animation: scroll-right 60s linear infinite;
 }
+@media (max-width: 767px) {
+  .animate-scroll-left,
+  .animate-scroll-right {
+    animation-duration: 20s;
+  }
+}
