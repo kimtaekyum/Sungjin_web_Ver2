@@ -19,10 +19,38 @@ function formatDateStr(y: number, m: number, d: number) {
   return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
 
+function getNthThursday(year: number, monthIndex: number, n: number) {
+  const first = new Date(year, monthIndex, 1);
+  const firstThu = ((4 - first.getDay() + 7) % 7) + 1;
+  return new Date(year, monthIndex, firstThu + (n - 1) * 7);
+}
+
 function getCsatDate(year: number) {
-  const nov1 = new Date(year, 10, 1);
-  const firstThu = ((4 - nov1.getDay() + 7) % 7) + 1;
-  return new Date(year, 10, firstThu + 14);
+  return getNthThursday(year, 10, 3);
+}
+
+const EXAM_COLORS = {
+  csat: "#B81D22",
+  june: "#1E88E5",
+  sept: "#43A047",
+} as const;
+
+const EXAM_DATES_OVERRIDE: Record<number, { csat?: string; june?: string; sept?: string }> = {
+  2026: { june: "2026-06-04", sept: "2026-09-02", csat: "2026-11-19" },
+};
+
+function generateExamEvents(year: number): (AcademyEvent & { color: string })[] {
+  const examYear = year + 1;
+  const fmt = (d: Date) => formatDateStr(d.getFullYear(), d.getMonth(), d.getDate());
+  const override = EXAM_DATES_OVERRIDE[year];
+  const csat = override?.csat ?? fmt(getCsatDate(year));
+  const june = override?.june ?? fmt(getNthThursday(year, 5, 1));
+  const sept = override?.sept ?? fmt(getNthThursday(year, 8, 1));
+  return [
+    { id: `csat-${year}`, title: `${examYear}학년도 수능`, startDate: csat, color: EXAM_COLORS.csat },
+    { id: `mock6-${year}`, title: `${examYear}학년도 6월 모의평가`, startDate: june, color: EXAM_COLORS.june },
+    { id: `mock9-${year}`, title: `${examYear}학년도 9월 모의평가`, startDate: sept, color: EXAM_COLORS.sept },
+  ];
 }
 
 export default function EventCalendar() {
@@ -34,10 +62,20 @@ export default function EventCalendar() {
     getEvents().then(setAllEvents);
   }, []);
 
-  const eventsWithColor = useMemo(
-    () => allEvents.map((ev, idx) => ({ ...ev, color: RAINBOW[idx % RAINBOW.length] })),
-    [allEvents]
-  );
+  const year = currentDate.getFullYear();
+
+  const eventsWithColor = useMemo(() => {
+    const exams = [
+      ...generateExamEvents(year - 1),
+      ...generateExamEvents(year),
+      ...generateExamEvents(year + 1),
+    ];
+    const supabaseEvents = allEvents.map((ev, idx) => ({
+      ...ev,
+      color: RAINBOW[idx % RAINBOW.length],
+    }));
+    return [...exams, ...supabaseEvents];
+  }, [allEvents, year]);
 
   const ddayText = useMemo(() => {
     const now = new Date();
@@ -52,7 +90,6 @@ export default function EventCalendar() {
     return `${csatYear + 1}학년도 수능 D-${diff}`;
   }, []);
 
-  const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const firstDay = new Date(year, month, 1).getDay();
   const lastDate = new Date(year, month + 1, 0).getDate();
