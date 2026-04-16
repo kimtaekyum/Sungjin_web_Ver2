@@ -15,13 +15,15 @@ export default function Footer() {
       {/* ===== Mobile: slim ===== */}
       <div className="md:hidden relative mx-auto max-w-[1200px] px-4 pt-10 pb-6">
         <div className="flex flex-col items-start gap-4 mb-6">
-          <Image
-            src="/images/logo@2x.png"
-            alt={ACADEMY_INFO.name}
-            width={160}
-            height={37}
-            className="h-7 w-auto shrink-0"
-          />
+          <Link href="/" aria-label={`${ACADEMY_INFO.name} 홈`} className="shrink-0">
+            <Image
+              src="/images/logo@2x.png"
+              alt={ACADEMY_INFO.name}
+              width={160}
+              height={37}
+              className="h-7 w-auto"
+            />
+          </Link>
           <div className="flex flex-col gap-1 text-sm text-white/60">
             <p>{ACADEMY_INFO.address}</p>
             <a href={`tel:${ACADEMY_INFO.phone}`} className="hover:text-white transition-colors">
@@ -54,13 +56,15 @@ export default function Footer() {
         <div className="grid gap-10 md:grid-cols-4 mb-12">
           {/* Brand */}
           <div className="md:col-span-1">
-            <Image
-              src="/images/logo@2x.png"
-              alt={ACADEMY_INFO.name}
-              width={140}
-              height={32}
-              className="h-8 w-auto mb-3"
-            />
+            <Link href="/" aria-label={`${ACADEMY_INFO.name} 홈`} className="inline-block mb-3">
+              <Image
+                src="/images/logo@2x.png"
+                alt={ACADEMY_INFO.name}
+                width={140}
+                height={32}
+                className="h-8 w-auto"
+              />
+            </Link>
             <p className="text-sm text-white/50 leading-relaxed">
               {ACADEMY_INFO.slogan}
             </p>
