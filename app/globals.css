@@ -54,6 +54,51 @@ html {
   border-color: #9F9E9E;
 }
 
+/* Card 3D tilt + spotlight (only on hover-capable devices) */
+.card-interactive {
+  position: relative;
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 0.25s ease-out, border-color 0.2s ease;
+  will-change: transform;
+}
+.card-interactive::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    360px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(184, 29, 34, 0.08),
+    transparent 45%
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.card-interactive:hover::before {
+  opacity: 1;
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .card-interactive { transform: none; }
+  .card-interactive::before { display: none; }
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #EEEEEE 0%, #F5F5F5 50%, #EEEEEE 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+}
+
 /* Testimonial marquee */
 @keyframes scroll-left {
   0% { transform: translateX(0); }

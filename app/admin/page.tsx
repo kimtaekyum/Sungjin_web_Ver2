@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import FaIcon from "@/components/ui/FaIcon";
+import { AdminCardListSkeleton } from "@/components/ui/Skeleton";
 import { supabase } from "@/lib/supabase";
 import { getNotices, addNotice, updateNotice, deleteNotice, type Notice } from "@/lib/notices";
 import { getEvents, addEvent, updateEvent, deleteEvent } from "@/lib/events";
@@ -590,9 +591,7 @@ export default function AdminPage() {
             {/* Notice list */}
             <div>
               {loading ? (
-                <div className="rounded-xl bg-surface border border-border/50 p-12 text-center">
-                  <p className="text-text-sub text-sm">불러오는 중...</p>
-                </div>
+                <AdminCardListSkeleton count={4} />
               ) : notices.length === 0 ? (
                 <div className="rounded-xl bg-surface border border-border/50 p-12 text-center">
                   <div className="text-text-hint mb-3">
@@ -724,9 +723,7 @@ export default function AdminPage() {
             {/* Event list */}
             <div>
               {loadingEvents ? (
-                <div className="rounded-xl bg-surface border border-border/50 p-12 text-center">
-                  <p className="text-text-sub text-sm">불러오는 중...</p>
-                </div>
+                <AdminCardListSkeleton count={4} />
               ) : events.length === 0 ? (
                 <div className="rounded-xl bg-surface border border-border/50 p-12 text-center">
                   <div className="text-text-hint mb-3">
@@ -782,9 +779,7 @@ export default function AdminPage() {
           // ===== Consultations tab =====
           <div>
             {loadingConsultations ? (
-              <div className="rounded-xl bg-surface border border-border/50 p-12 text-center">
-                <p className="text-text-sub text-sm">불러오는 중...</p>
-              </div>
+              <AdminCardListSkeleton count={3} />
             ) : consultations.length === 0 ? (
               <div className="rounded-xl bg-surface border border-border/50 p-12 text-center">
                 <div className="text-text-hint mb-3">

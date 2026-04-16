@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import SectionTitle from "@/components/ui/SectionTitle";
 import FaIcon from "@/components/ui/FaIcon";
+import { NoticeListSkeleton } from "@/components/ui/Skeleton";
 import { getNotices, type Notice } from "@/lib/notices";
 
 export default function NoticesPage() {
@@ -26,9 +27,7 @@ export default function NoticesPage() {
         />
 
         {loading ? (
-          <div className="mx-auto max-w-3xl rounded-xl bg-surface border border-border/50 p-16 text-center">
-            <p className="text-text-sub text-sm">불러오는 중...</p>
-          </div>
+          <NoticeListSkeleton count={5} />
         ) : notices.length === 0 ? (
           <div className="mx-auto max-w-3xl rounded-xl bg-surface border border-border/50 p-16 text-center">
             <div className="text-text-hint mb-3">
