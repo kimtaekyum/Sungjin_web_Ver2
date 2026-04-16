@@ -624,15 +624,35 @@ export default function AdminPage() {
                           {notice.content && (
                             <p className="text-sm text-text-sub line-clamp-2 mt-1">{notice.content}</p>
                           )}
-                          <p className="text-xs text-text-hint mt-2">
-                            {new Date(notice.created_at).toLocaleDateString("ko-KR", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            })}
-                          </p>
+                          <div className="mt-2 flex items-center gap-2">
+                            <div className="md:hidden flex gap-1">
+                              <button
+                                onClick={() => handleEdit(notice)}
+                                className="p-2 rounded-lg text-text-hint hover:text-primary hover:bg-bg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                                aria-label="공지사항 수정"
+                              >
+                                <FaIcon name="pencil" className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(notice.id)}
+                                className="p-2 rounded-lg text-text-hint hover:text-danger hover:bg-[#FDF2F2] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                                aria-label="공지사항 삭제"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
+                            <p className="text-xs text-text-hint">
+                              {new Date(notice.created_at).toLocaleDateString("ko-KR", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })}
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex gap-1 shrink-0">
+                        <div className="hidden md:flex gap-1 shrink-0">
                           <button
                             onClick={() => handleEdit(notice)}
                             className="p-2 rounded-lg text-text-hint hover:text-primary hover:bg-bg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
