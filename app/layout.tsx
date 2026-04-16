@@ -41,21 +41,12 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     siteName: "성진학원",
     url: "/",
-    images: [
-      {
-        url: "/images/logo@2x.png",
-        width: 800,
-        height: 185,
-        alt: "성진학원",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "성진학원 | 대학 잘 보내는 1대1 맞춤 첨삭 전문",
     description:
       "신월동 30년 전통 입시 전문 학원. 서울대·포항공대 합격. 1대1 밀착 첨삭 시스템.",
-    images: ["/images/logo@2x.png"],
   },
   robots: {
     index: true,
