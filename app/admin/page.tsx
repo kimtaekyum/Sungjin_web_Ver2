@@ -83,6 +83,14 @@ export default function AdminPage() {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loadingConsultations, setLoadingConsultations] = useState(false);
 
+  // Confirm delete dialog
+  const [confirmDialog, setConfirmDialog] = useState<{
+    title: string;
+    description?: string;
+    onConfirm: () => Promise<void> | void;
+  } | null>(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
+
   const loadNotices = useCallback(async () => {
     setLoading(true);
     const data = await getNotices();
@@ -178,10 +186,15 @@ export default function AdminPage() {
     setUrlError(null);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("이 공지사항을 삭제하시겠습니까?")) return;
-    await deleteNotice(id);
-    await loadNotices();
+  const handleDelete = (id: number, title: string) => {
+    setConfirmDialog({
+      title: "공지사항을 삭제할까요?",
+      description: title,
+      onConfirm: async () => {
+        await deleteNotice(id);
+        await loadNotices();
+      },
+    });
   };
 
   const handleCancel = () => {
@@ -259,10 +272,15 @@ export default function AdminPage() {
     });
   };
 
-  const handleEventDelete = async (id: string) => {
-    if (!confirm("이 일정을 삭제하시겠습니까?")) return;
-    await deleteEvent(id);
-    await loadEvents();
+  const handleEventDelete = (id: string, title: string) => {
+    setConfirmDialog({
+      title: "일정을 삭제할까요?",
+      description: title,
+      onConfirm: async () => {
+        await deleteEvent(id);
+        await loadEvents();
+      },
+    });
   };
 
   const handleEventCancel = () => {
@@ -276,10 +294,15 @@ export default function AdminPage() {
     await loadConsultations();
   };
 
-  const handleConsultationDelete = async (id: number) => {
-    if (!confirm("이 상담 신청을 삭제하시겠습니까?")) return;
-    await deleteConsultation(id);
-    await loadConsultations();
+  const handleConsultationDelete = (id: number, name: string) => {
+    setConfirmDialog({
+      title: "상담 신청을 삭제할까요?",
+      description: `${name}님 상담`,
+      onConfirm: async () => {
+        await deleteConsultation(id);
+        await loadConsultations();
+      },
+    });
   };
 
   const formatDateDisplay = (dateStr: string) => {
@@ -634,7 +657,7 @@ export default function AdminPage() {
                                 <FaIcon name="pencil" className="w-3.5 h-3.5" />
                               </button>
                               <button
-                                onClick={() => handleDelete(notice.id)}
+                                onClick={() => handleDelete(notice.id, notice.title)}
                                 className="p-2 rounded-lg text-text-hint hover:text-danger hover:bg-[#FDF2F2] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 aria-label="공지사항 삭제"
                               >
@@ -661,7 +684,7 @@ export default function AdminPage() {
                             <FaIcon name="pencil" className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => handleDelete(notice.id)}
+                            onClick={() => handleDelete(notice.id, notice.title)}
                             className="p-2 rounded-lg text-text-hint hover:text-danger hover:bg-[#FDF2F2] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                             aria-label="공지사항 삭제"
                           >
@@ -779,7 +802,7 @@ export default function AdminPage() {
                             <FaIcon name="pencil" className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => handleEventDelete(ev.id)}
+                            onClick={() => handleEventDelete(ev.id, ev.title)}
                             className="p-2 rounded-lg text-text-hint hover:text-danger hover:bg-[#FDF2F2] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                             aria-label="일정 삭제"
                           >
@@ -883,7 +906,7 @@ export default function AdminPage() {
                           <option value="declined">보류</option>
                         </select>
                         <button
-                          onClick={() => handleConsultationDelete(c.id)}
+                          onClick={() => handleConsultationDelete(c.id, c.parent_name)}
                           className="p-2 rounded-lg text-text-hint hover:text-danger hover:bg-[#FDF2F2] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                           aria-label="상담 삭제"
                         >
@@ -900,6 +923,70 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      {/* Confirm delete dialog */}
+      {confirmDialog && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-4"
+          onClick={() => {
+            if (!confirmBusy) setConfirmDialog(null);
+          }}
+        >
+          <div
+            className="bg-surface rounded-xl w-full max-w-sm p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-9 h-9 rounded-full bg-[#FDF2F2] flex items-center justify-center text-danger shrink-0">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-medium text-[#444444]">{confirmDialog.title}</h3>
+                {confirmDialog.description && (
+                  <p className="mt-1 text-sm text-text-sub truncate">{confirmDialog.description}</p>
+                )}
+                <p className="mt-2 text-xs text-text-hint">삭제하면 복구할 수 없습니다.</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmDialog(null)}
+                disabled={confirmBusy}
+                className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm text-text-sub hover:bg-bg transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!confirmDialog) return;
+                  setConfirmBusy(true);
+                  try {
+                    await confirmDialog.onConfirm();
+                  } finally {
+                    setConfirmBusy(false);
+                    setConfirmDialog(null);
+                  }
+                }}
+                disabled={confirmBusy}
+                className="flex-1 rounded-lg bg-danger text-white py-2.5 text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-1.5"
+              >
+                {confirmBusy ? (
+                  <>
+                    <FaIcon name="spinner" className="w-3.5 h-3.5 animate-spin" />
+                    삭제 중...
+                  </>
+                ) : (
+                  "삭제"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* FAQ Modal */}
       {faqOpen && (
