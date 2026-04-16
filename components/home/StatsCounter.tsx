@@ -47,7 +47,7 @@ function AnimatedNumber({ value, prefix, suffix }: { value: string; prefix?: str
   }, [num]);
 
   return (
-    <div ref={ref} className="text-4xl font-medium text-primary md:text-[56px] leading-none">
+    <div ref={ref} className="font-heading text-4xl font-semibold tracking-tight text-primary md:text-[56px] leading-none">
       {prefix && <span className="text-primary text-2xl md:text-3xl mr-0.5">{prefix}</span>}
       {display}
       <span className="text-text-sub text-xl md:text-2xl ml-0.5">{suffix}</span>
