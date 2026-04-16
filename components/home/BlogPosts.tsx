@@ -48,7 +48,7 @@ export default async function BlogPosts() {
                 <span className="text-sm text-text group-hover:text-primary transition-colors truncate flex-1 min-w-0">
                   {post.title}
                 </span>
-                <span className="text-xs text-text-hint shrink-0">
+                <span className="hidden md:inline text-xs text-text-hint shrink-0">
                   {formatDate(post.date)}
                 </span>
               </a>
