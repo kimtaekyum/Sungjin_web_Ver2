@@ -89,17 +89,17 @@ export default function ProgramsPage() {
           {/* 운영 규정 */}
           <div className="mt-16">
             <SectionTitle title="운영 규정 안내" subtitle="투명하고 체계적인 학원 운영" />
-            <div className="mx-auto max-w-3xl space-y-8">
-              <div className="rounded-xl bg-bg p-6 md:p-8">
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card hover={false} className="p-5 md:p-6">
                 <h3 className="text-base font-medium text-[#444444] mb-4">숙제 및 테스트</h3>
                 <ul className="space-y-2 text-sm text-text-sub">
-                  <li>• 중등부 수학: 백지 개념 테스트, 실전 모의고사로 이해도 점검</li>
+                  <li>• 수학: 백지 개념 테스트, 실전 모의고사로 이해도 점검</li>
                   <li>• 영문법: 문제 풀이 + 첨삭 선생님이 직접 발음 검사</li>
                   <li>• 수업 전후: 첨삭실에서 1대1 문제 풀이와 과제 완수</li>
                 </ul>
-              </div>
+              </Card>
 
-              <div className="rounded-xl bg-bg p-6 md:p-8">
+              <Card hover={false} className="p-5 md:p-6">
                 <h3 className="text-base font-medium text-[#444444] mb-4">결석 및 보강</h3>
                 <ul className="space-y-2 text-sm text-text-sub">
                   <li>• 고등 수학·중고등 국어: 매 수업 영상 촬영 → 보강 활용</li>
@@ -107,56 +107,54 @@ export default function ProgramsPage() {
                   <li>• 개별 보충 시급할 경우 별도 과외식 밀착 수업 가능</li>
                   <li>• 개별 진도 맞춤 숙제로 결손 방지</li>
                 </ul>
-              </div>
+              </Card>
 
-              <div className="rounded-xl bg-bg p-6 md:p-8">
+              <Card hover={false} className="p-5 md:p-6">
                 <h3 className="text-base font-medium text-[#444444] mb-4">상담 및 소통</h3>
                 <ul className="space-y-2 text-sm text-text-sub">
                   <li>• 매일 카톡: 초·중등 수업 출결·숙제 피드백</li>
-                  <li>• 월간 리포트: 정기고사 없는 달에 월별 고사 결과·자기평가 보고서</li>
+                  <li>• 월간 리포트: 고사 없는 달에 고사결과·자기평가 보고서</li>
                   <li>• 진로 상담: 중3 2학기부터 High-act 분석으로 진로 관리</li>
                   <li>• 심층 면담: 성적 정체기 시 교사진 회의 후 1대1 면담</li>
                 </ul>
-              </div>
+              </Card>
             </div>
           </div>
 
           {/* 수강료 종합표 */}
           <div className="mt-16">
             <SectionTitle title="수강료 종합 안내" />
-            <div className="mx-auto max-w-lg">
-              <Card hover={false} className="overflow-hidden p-0">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-primary text-white">
-                      <th className="px-6 py-3 text-left text-sm font-medium">과정</th>
-                      <th className="px-6 py-3 text-center text-sm font-medium">수학</th>
-                      <th className="px-6 py-3 text-center text-sm font-medium">영어</th>
-                      <th className="px-6 py-3 text-center text-sm font-medium">국어</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    <tr>
-                      <td className="px-6 py-4 text-sm font-medium text-[#444444]">고등</td>
-                      <td className="px-6 py-4 text-sm text-center text-text-sub">36만</td>
-                      <td className="px-6 py-4 text-sm text-center text-text-sub">36만</td>
-                      <td className="px-6 py-4 text-sm text-center text-text-sub">26만</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 text-sm font-medium text-[#444444]">중등</td>
-                      <td className="px-6 py-4 text-sm text-center text-text-sub">26만</td>
-                      <td className="px-6 py-4 text-sm text-center text-text-sub">26만</td>
-                      <td className="px-6 py-4 text-sm text-center text-text-sub">15만</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 text-sm font-medium text-[#444444]">초등</td>
-                      <td className="px-6 py-4 text-sm text-center text-text-sub">23만</td>
-                      <td className="px-6 py-4 text-sm text-center text-text-sub">23만</td>
-                      <td className="px-6 py-4 text-sm text-center text-text-sub">-</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </Card>
+            <div className="overflow-hidden rounded-xl bg-surface shadow-sm">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-primary text-white">
+                    <th className="px-6 py-4 text-left text-sm font-medium">과정</th>
+                    <th className="px-6 py-4 text-center text-sm font-medium">수학</th>
+                    <th className="px-6 py-4 text-center text-sm font-medium">영어</th>
+                    <th className="px-6 py-4 text-center text-sm font-medium">국어</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  <tr>
+                    <td className="px-6 py-5 text-sm font-medium text-[#444444]">고등</td>
+                    <td className="px-6 py-5 text-sm text-center text-text-sub">36만</td>
+                    <td className="px-6 py-5 text-sm text-center text-text-sub">36만</td>
+                    <td className="px-6 py-5 text-sm text-center text-text-sub">26만</td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-5 text-sm font-medium text-[#444444]">중등</td>
+                    <td className="px-6 py-5 text-sm text-center text-text-sub">26만</td>
+                    <td className="px-6 py-5 text-sm text-center text-text-sub">26만</td>
+                    <td className="px-6 py-5 text-sm text-center text-text-sub">15만</td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-5 text-sm font-medium text-[#444444]">초등</td>
+                    <td className="px-6 py-5 text-sm text-center text-text-sub">23만</td>
+                    <td className="px-6 py-5 text-sm text-center text-text-sub">23만</td>
+                    <td className="px-6 py-5 text-sm text-center text-text-sub">-</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
