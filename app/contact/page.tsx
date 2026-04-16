@@ -156,44 +156,6 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* 운영 규정 */}
-      <section className="bg-surface py-16 md:py-24">
-        <div className="mx-auto max-w-[1200px] px-4">
-          <SectionTitle title="운영 규정 안내" subtitle="투명하고 체계적인 학원 운영" />
-
-          <div className="mx-auto max-w-3xl space-y-8">
-            <div className="rounded-xl bg-bg p-6 md:p-8">
-              <h3 className="text-base font-medium text-[#444444] mb-4">숙제 및 테스트</h3>
-              <ul className="space-y-2 text-sm text-text-sub">
-                <li>• 중등부 수학: 백지 개념 테스트, 실전 모의고사로 이해도 점검</li>
-                <li>• 영문법: 문제 풀이 + 첨삭 선생님이 직접 발음 검사</li>
-                <li>• 수업 전후: 첨삭실에서 1대1 문제 풀이와 과제 완수</li>
-              </ul>
-            </div>
-
-            <div className="rounded-xl bg-bg p-6 md:p-8">
-              <h3 className="text-base font-medium text-[#444444] mb-4">결석 및 보강</h3>
-              <ul className="space-y-2 text-sm text-text-sub">
-                <li>• 고등 수학·중고등 국어: 매 수업 영상 촬영 → 보강 활용</li>
-                <li>• 결석·복습 필요 시 영상 보충 수강 가능</li>
-                <li>• 개별 보충 시급할 경우 별도 과외식 밀착 수업 가능</li>
-                <li>• 개별 진도 맞춤 숙제로 결손 방지</li>
-              </ul>
-            </div>
-
-            <div className="rounded-xl bg-bg p-6 md:p-8">
-              <h3 className="text-base font-medium text-[#444444] mb-4">상담 및 소통</h3>
-              <ul className="space-y-2 text-sm text-text-sub">
-                <li>• 매일 카톡: 초·중등 수업 출결·숙제 피드백</li>
-                <li>• 월간 리포트: 정기고사 없는 달에 월별 고사 결과·자기평가 보고서</li>
-                <li>• 진로 상담: 중3 2학기부터 High-act 분석으로 진로 관리</li>
-                <li>• 심층 면담: 성적 정체기 시 교사진 회의 후 1대1 면담</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* FAQ */}
       <section className="py-16 md:py-24">
         <div className="mx-auto max-w-[1200px] px-4">

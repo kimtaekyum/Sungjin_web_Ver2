@@ -40,7 +40,7 @@ export async function fetchLatestBlogPosts(
       // 동기화 경로(fresh=true)에선 캐시 우회, 홈 화면은 1시간 캐시 유지
       ...(opts.fresh ? { cache: "no-store" as const } : { next: { revalidate: 3600 } }),
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; SeongjinBot/1.0)",
+        "User-Agent": "Mozilla/5.0 (compatible; SungjinBot/1.0)",
       },
     });
 
