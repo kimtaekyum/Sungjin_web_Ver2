@@ -30,7 +30,8 @@ export default function TestimonialCarousel() {
               <p className="text-text text-[14px] leading-relaxed line-clamp-5">
                 {t.content}
               </p>
-              <p className="mt-4 text-xs font-medium text-primary">
+              <div className="text-primary/20 text-3xl leading-none font-serif text-right mt-3">&rdquo;</div>
+              <p className="mt-2 text-xs font-medium text-primary">
                 — {t.author}
               </p>
             </div>
@@ -50,7 +51,8 @@ export default function TestimonialCarousel() {
               <p className="text-text text-[14px] leading-relaxed line-clamp-5">
                 {t.content}
               </p>
-              <p className="mt-4 text-xs font-medium text-primary">
+              <div className="text-primary/20 text-3xl leading-none font-serif text-right mt-3">&rdquo;</div>
+              <p className="mt-2 text-xs font-medium text-primary">
                 — {t.author}
               </p>
             </div>

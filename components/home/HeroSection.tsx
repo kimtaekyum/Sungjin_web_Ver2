@@ -1,109 +1,56 @@
 import Image from "next/image";
 import Button from "@/components/ui/Button";
-import FaIcon from "@/components/ui/FaIcon";
-import { ACADEMY_INFO } from "@/lib/constants";
-import { UNIVERSITY_LOGOS } from "@/data/results";
 
 export default function HeroSection() {
   return (
     <section className="relative bg-[#2C2C2A] overflow-hidden -mt-16 md:mt-0">
-      {/* Background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#2C2C2A] via-[#3a3a38] to-[#2C2C2A]" />
-        {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
-        {/* Glow effects */}
-        <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-[#B81D22]/8 rounded-full blur-[150px]" />
-        <div className="absolute bottom-0 left-1/3 w-[400px] h-[400px] bg-[#D4A84B]/5 rounded-full blur-[120px]" />
-      </div>
-
-      <div className="relative mx-auto max-w-[1200px] px-4 md:px-6 pt-32 pb-24 md:pt-44 md:pb-36">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          {/* Text */}
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm px-4 py-1.5 mb-6">
-              <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-white/80 text-xs font-medium tracking-wide">
-                신월동 30년 전통 입시 전문 학원
-              </span>
-            </div>
-            <h1 className="text-[30px] font-medium leading-[1.2] text-white sm:text-[40px] md:text-[52px] md:leading-[1.15]">
-              대학 잘 보내는
-              <br />
-              <span className="text-[#FF6B6B]">1대1 맞춤 첨삭</span> 전문
-              <br />
-              성진학원
-            </h1>
-            <p className="mt-5 text-white/60 text-[15px] leading-relaxed md:text-lg md:mt-7 max-w-lg">
-              {ACADEMY_INFO.subSlogan}
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row md:mt-10">
-              <Button variant="primary" href="/contact">
-                상담 신청하기
-              </Button>
-              <Button
-                variant="ghost"
-                href="/programs"
-                className="border-white/20 text-white hover:bg-white/10 hover:text-white hover:border-white/30 bg-transparent"
-              >
-                수업 안내 보기
-              </Button>
-            </div>
-          </div>
-
-          {/* Visual: Info cards */}
-          <div className="hidden md:block relative">
-            <div className="grid grid-cols-2 gap-4">
-              {/* Large card top-left */}
-              <div className="relative overflow-hidden rounded-2xl bg-white shadow-lg p-6 row-span-2 flex flex-col justify-end min-h-[280px]">
-                {/* 서울대 로고 워터마크 */}
-                {UNIVERSITY_LOGOS["서울대"] && (
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 flex items-center justify-center"
-                  >
-                    <Image
-                      src={UNIVERSITY_LOGOS["서울대"].path}
-                      alt=""
-                      width={220}
-                      height={220}
-                      style={{ transform: `scale(${UNIVERSITY_LOGOS["서울대"].scale ?? 1})` }}
-                      className="object-contain w-44 h-44"
-                    />
-                  </div>
-                )}
-                <div className="relative text-primary mb-3">
-                  <FaIcon name="graduation-cap" className="w-10 h-10" />
-                </div>
-                <p className="relative whitespace-nowrap">
-                  <span className="text-text font-medium text-base">2026학년도</span>{" "}
-                  <span className="text-primary font-semibold text-xl">서울대 합격</span>
-                </p>
-              </div>
-              {/* Small card top-right */}
-              <div className="rounded-2xl bg-white shadow-lg p-5 flex flex-col justify-center">
-                <div className="text-primary mb-2">
-                  <FaIcon name="pencil" className="w-6 h-6" />
-                </div>
-                <p className="text-text font-medium text-sm">1대1 밀착 첨삭</p>
-                <p className="text-text-sub text-xs mt-1">개념 완벽 흡수 시스템</p>
-              </div>
-              {/* Small card bottom-right */}
-              <div className="rounded-2xl bg-primary/20 backdrop-blur-sm p-5 flex flex-col justify-center">
-                <div className="text-white/80 mb-2">
-                  <FaIcon name="chart-column" className="w-6 h-6" />
-                </div>
-                <p className="text-white/90 font-medium text-sm">초4 ~ 고3</p>
-                <p className="text-white/60 text-xs mt-1">국·영·수 전 과목</p>
-              </div>
-            </div>
+      {/* ===== Mobile: 신규 배너 이미지 ===== */}
+      <div className="md:hidden relative w-full pt-16">
+        <div className="relative w-full aspect-[2323/4193]">
+          <Image
+            src="/images/hero-banner-mobile.png"
+            alt="강의가 끝이 아닌 1대1 맞춤 첨삭, 대학 잘 보내는 성진학원"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+          {/* 좌측 하단 CTA */}
+          <div className="absolute bottom-6 left-4 right-4 flex flex-col gap-2.5 z-10">
+            <Button variant="primary" href="/programs" className="w-full">
+              수업 안내 보기
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* ===== Desktop: 신규 배너 이미지 ===== */}
+      <div className="hidden md:block relative w-full pt-16">
+        <div className="relative w-full aspect-[2/1]">
+          <Image
+            src="/images/hero-banner.png"
+            alt="강의가 끝이 아닌 1대1 맞춤 첨삭, 대학 잘 보내는 성진학원"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+          {/* 좌측 하단 CTA */}
+          <div className="absolute bottom-8 left-8 lg:bottom-12 lg:left-16 flex flex-row gap-3 z-10">
+            <Button variant="primary" href="/contact">
+              상담 신청하기
+            </Button>
+            <Button
+              variant="ghost"
+              href="/programs"
+              className="border-white/20 text-white hover:bg-white/10 hover:text-white hover:border-white/30 bg-transparent"
+            >
+              수업 안내 보기
+            </Button>
+          </div>
+        </div>
+      </div>
+
     </section>
   );
 }

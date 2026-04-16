@@ -3,12 +3,16 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { NAV_ITEMS, ACADEMY_INFO } from "@/lib/constants";
 import MobileNav from "./MobileNav";
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  const solid = scrolled || isHome;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -20,30 +24,11 @@ export default function Header() {
     <>
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-surface/95 backdrop-blur-md shadow-sm ${
-        scrolled
+        solid
           ? ""
           : "md:bg-transparent md:shadow-none md:-translate-y-full md:opacity-0 md:pointer-events-none"
       }`}
     >
-      {/* Top bar (desktop only) */}
-      <div
-        className={`hidden md:block border-b transition-all duration-300 ${
-          scrolled ? "border-border/50 max-h-0 overflow-hidden opacity-0" : "border-white/10 max-h-10 opacity-100"
-        }`}
-      >
-        <div className="mx-auto max-w-[1200px] px-6 flex h-9 items-center justify-end gap-6 text-xs">
-          <span className={scrolled ? "text-text-sub" : "text-white/70"}>
-            {ACADEMY_INFO.operatingHours}
-          </span>
-          <a
-            href={`tel:${ACADEMY_INFO.phone}`}
-            className={`font-medium ${scrolled ? "text-primary" : "text-white/90 hover:text-white"} transition-colors`}
-          >
-            {ACADEMY_INFO.phone}
-          </a>
-        </div>
-      </div>
-
       {/* Main nav */}
       <div className="mx-auto max-w-[1200px] px-4 md:px-6 flex h-16 items-center justify-between md:h-[72px]">
         {/* Logo */}
@@ -53,9 +38,7 @@ export default function Header() {
             alt={ACADEMY_INFO.name}
             width={160}
             height={37}
-            className={`h-8 w-auto md:h-9 transition-all duration-300 ${
-              scrolled ? "" : "md:brightness-0 md:invert"
-            }`}
+            className="h-8 w-auto md:h-9 transition-all duration-300"
             priority
           />
         </Link>
@@ -66,11 +49,7 @@ export default function Header() {
             <Link
               key={item.href}
               href={item.href}
-              className={`text-[14px] font-medium tracking-wide transition-colors ${
-                scrolled
-                  ? "text-text hover:text-primary"
-                  : "text-white/85 hover:text-white"
-              }`}
+              className="text-[14px] font-medium tracking-wide text-text hover:text-primary transition-colors"
             >
               {item.label}
             </Link>
