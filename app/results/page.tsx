@@ -40,7 +40,7 @@ export default function ResultsPage() {
                         width={160}
                         height={160}
                         style={{ transform: `scale(${logo.scale ?? 1})` }}
-                        className="object-contain w-28 h-28 md:w-36 md:h-36 opacity-[0.07] grayscale transition-opacity duration-300 group-hover:opacity-[0.14]"
+                        className="object-contain w-28 h-28 md:w-36 md:h-36 opacity-[0.18] transition-opacity duration-300 group-hover:opacity-[0.35]"
                       />
                     </div>
                   )}

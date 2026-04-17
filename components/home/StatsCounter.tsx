@@ -4,21 +4,22 @@ import { useEffect, useRef, useState } from "react";
 import FaIcon from "@/components/ui/FaIcon";
 
 interface Stat {
-  label: string;
+  label: React.ReactNode;
   value: string;
   prefix?: string;
   suffix?: string;
   icon: string;
+  duration?: number;
 }
 
 const stats: Stat[] = [
   { label: "운영 기간", value: "30", suffix: "년+", icon: "landmark" },
-  { label: "2026 서울대 합격", value: "1", suffix: "명", icon: "graduation-cap" },
-  { label: "2026 포항공대 합격", value: "1", suffix: "명", icon: "flask" },
+  { label: <>23·26학년도 <span className="text-primary">서울대 약대</span></>, value: "2", suffix: "회 배출", icon: "graduation-cap", duration: 900 },
+  { label: <>2026학년도 <span className="text-primary">대학 합격률</span></>, value: "100", suffix: "%", icon: "flask" },
   { label: "1대1 밀착 첨삭", value: "100", suffix: "%", icon: "pencil" },
 ];
 
-function AnimatedNumber({ value, prefix, suffix }: { value: string; prefix?: string; suffix?: string }) {
+function AnimatedNumber({ value, prefix, suffix, duration: durationProp }: { value: string; prefix?: string; suffix?: string; duration?: number }) {
   const [display, setDisplay] = useState("0");
   const ref = useRef<HTMLDivElement>(null);
   const num = parseInt(value);
@@ -27,7 +28,7 @@ function AnimatedNumber({ value, prefix, suffix }: { value: string; prefix?: str
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          const duration = 1800;
+          const duration = durationProp ?? 1800;
           const startTime = performance.now();
           const animate = (currentTime: number) => {
             const elapsed = currentTime - startTime;
@@ -68,8 +69,8 @@ export default function StatsCounter() {
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#FDF2F2] mb-4 text-primary">
                 <FaIcon name={stat.icon} className="w-5 h-5" />
               </div>
-              <AnimatedNumber value={stat.value} prefix={stat.prefix} suffix={stat.suffix} />
-              <p className="mt-3 text-sm text-text-sub md:text-[15px]">
+              <AnimatedNumber value={stat.value} prefix={stat.prefix} suffix={stat.suffix} duration={stat.duration} />
+              <p className="mt-3 text-[15px] text-text-sub md:text-base">
                 {stat.label}
               </p>
             </div>

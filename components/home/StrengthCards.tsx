@@ -21,7 +21,7 @@ export default function StrengthCards() {
                   <FaIcon name={s.icon} className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-[17px] font-medium text-[#444444] mb-2 md:text-lg">
+                  <h3 className="text-[17px] font-semibold text-[#444444] mb-2 md:text-lg">
                     {s.title}
                   </h3>
                   <p className="text-sm text-text-sub leading-relaxed">

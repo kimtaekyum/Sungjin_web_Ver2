@@ -35,7 +35,7 @@ export default function AdmissionHighlight() {
                       height={160}
                       sizes="(max-width: 768px) 128px, 160px"
                       style={{ transform: `scale(${logo.scale ?? 1})` }}
-                      className="object-contain w-32 h-32 md:w-40 md:h-40 opacity-[0.07] grayscale transition-opacity duration-300 group-hover:opacity-[0.14]"
+                      className="object-contain w-32 h-32 md:w-40 md:h-40 opacity-[0.18] transition-opacity duration-300 group-hover:opacity-[0.35]"
                     />
                   </div>
                 )}
