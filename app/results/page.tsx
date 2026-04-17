@@ -26,7 +26,7 @@ export default function ResultsPage() {
               return (
                 <article
                   key={i}
-                  className="group relative rounded-2xl bg-white border border-border/60 p-6 md:p-7 text-center transition-all duration-300 hover:border-primary/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 overflow-hidden"
+                  className="group relative rounded-2xl bg-white border border-border/60 p-6 md:p-7 pt-10 md:pt-12 text-center flex flex-col items-center justify-center min-h-[140px] md:min-h-[160px] transition-all duration-300 hover:border-primary/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 overflow-hidden"
                 >
                   {/* 로고 워터마크 배경 */}
                   {logo && (
@@ -55,11 +55,11 @@ export default function ResultsPage() {
                     </svg>
                   </span>
 
-                  <h3 className="relative text-lg md:text-xl font-medium text-[#2C2C2A] tracking-tight">
+                  <h3 className="relative text-lg md:text-xl font-bold text-[#2C2C2A] tracking-tight">
                     {r.university}
                   </h3>
                   {r.department ? (
-                    <p className="relative mt-2 text-sm text-text-sub leading-snug min-h-[2.5rem]">
+                    <p className="relative mt-2 text-[15px] text-text font-medium leading-snug min-h-[2.5rem]">
                       {r.department}
                     </p>
                   ) : (
