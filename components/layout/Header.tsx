@@ -1,33 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import { NAV_ITEMS, ACADEMY_INFO } from "@/lib/constants";
 import MobileNav from "./MobileNav";
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const pathname = usePathname();
-  const isHome = pathname === "/";
-  const solid = scrolled || isHome;
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
     <>
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-surface/95 backdrop-blur-md shadow-sm ${
-        solid
-          ? ""
-          : "md:bg-transparent md:shadow-none md:-translate-y-full md:opacity-0 md:pointer-events-none"
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-surface/95 backdrop-blur-md shadow-sm"
     >
       {/* Main nav */}
       <div className="mx-auto max-w-[1200px] px-4 md:px-6 flex h-16 items-center justify-between md:h-[72px]">
