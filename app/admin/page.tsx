@@ -337,8 +337,7 @@ export default function AdminPage() {
       <div className="min-h-screen flex items-center justify-center bg-bg px-4">
         <div className="w-full max-w-sm">
           <div className="rounded-xl bg-surface border border-border/50 p-8">
-            <h1 className="text-xl font-medium text-[#444444] mb-1 text-center">관리자 로그인</h1>
-            <p className="text-sm text-text-sub text-center mb-6">성진학원 관리자 페이지</p>
+            <h1 className="text-xl font-medium text-[#444444] mb-6 text-center">관리자 로그인</h1>
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-text mb-1.5">이메일</label>
@@ -422,7 +421,7 @@ export default function AdminPage() {
                   type="button"
                   onClick={handleSync}
                   disabled={syncing}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-3 py-1.5 text-[13px] md:text-sm font-medium text-primary hover:bg-primary/10 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-[13px] md:text-sm font-medium text-white hover:bg-[#8A1519] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   title="네이버 블로그 최신 글을 AI로 요약하여 공지사항으로 등록"
                 >
                   <FaIcon name={syncing ? "spinner" : "sync"} className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} />
