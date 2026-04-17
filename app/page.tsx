@@ -1,6 +1,7 @@
 export const revalidate = 3600; // 1 hour
 
 import HeroSection from "@/components/home/HeroSection";
+import PhotoStrip from "@/components/home/PhotoStrip";
 import StatsCounter from "@/components/home/StatsCounter";
 
 import StrengthCards from "@/components/home/StrengthCards";
@@ -13,6 +14,7 @@ export default function Home() {
   return (
     <>
       <HeroSection />
+      <PhotoStrip />
       <StatsCounter />
 
       <StrengthCards />

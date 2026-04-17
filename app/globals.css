@@ -120,3 +120,31 @@ html {
     animation-duration: 20s;
   }
 }
+
+/* Photo strip cards — responsive via CSS custom properties */
+.photo-card {
+  width: var(--w-m);
+  height: var(--h-m);
+}
+@media (min-width: 768px) {
+  .photo-card {
+    width: var(--w-d);
+    height: var(--h-d);
+  }
+}
+
+/* Photo strip marquee */
+.animate-marquee {
+  animation: scroll-left 50s linear infinite;
+}
+.animate-marquee-reverse {
+  animation: scroll-right 50s linear infinite;
+}
+@media (max-width: 767px) {
+  .animate-marquee {
+    animation-duration: 35s;
+  }
+  .animate-marquee-reverse {
+    animation-duration: 35s;
+  }
+}

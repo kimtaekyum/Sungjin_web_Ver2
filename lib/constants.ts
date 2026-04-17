@@ -10,7 +10,7 @@ export const ACADEMY_INFO = {
   registrationNo: "교육청 등록번호 제 977호",
   operatingHours: "월~토 13:00 ~ 22:00 (일·공휴일 휴원)",
   naverMapLink: "https://map.naver.com/p/entry/place/37941852",
-  kakaoLink: "#",
+  kakaoLink: "https://pf.kakao.com/_BdWxexj/chat",
   established: "30",
 } as const;
 
