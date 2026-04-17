@@ -28,7 +28,7 @@ export default function AboutPage() {
       {/* 인사말 & 교육철학 */}
       <section className="py-16 md:py-24">
         <div className="mx-auto max-w-[1200px] px-4">
-          <SectionTitle title="학원소개" subtitle="신월동 30년, 학생의 성장을 책임집니다" />
+          <SectionTitle title="학원소개" subtitle={<>신월동 <span className="text-primary">30년</span>, 학생의 성장을 <span className="text-primary">책임</span>집니다</>} />
 
           {/* 소개문 */}
           <div className="mx-auto max-w-3xl mb-16">
@@ -41,7 +41,7 @@ export default function AboutPage() {
           </div>
 
           {/* 교육철학 */}
-          <SectionTitle title="교육철학" subtitle="성진학원이 추구하는 4가지 핵심 가치" />
+          <SectionTitle title="교육철학" subtitle={<>성진학원이 추구하는 <span className="text-primary">4가지 핵심 가치</span></>} />
           <div className="grid gap-5 sm:grid-cols-2">
             {philosophies.map((p, i) => (
               <Card key={i} className="p-8">
@@ -67,7 +67,7 @@ export default function AboutPage() {
       {/* 강점 6가지 상세 */}
       <section className="bg-surface py-16 md:py-24">
         <div className="mx-auto max-w-[1200px] px-4">
-          <SectionTitle title="성진학원 6가지 강점" subtitle="학생의 성장을 위한 체계적인 교육 시스템" />
+          <SectionTitle title={<>성진학원 <span className="text-primary">6가지 강점</span></>} subtitle={<>학생의 <span className="text-primary">성장</span>을 위한 체계적인 교육 시스템</>} />
           <div className="space-y-6">
             {strengths.map((s) => (
               <div
@@ -94,7 +94,7 @@ export default function AboutPage() {
       {/* 시설 안내 */}
       <section className="py-16 md:py-24">
         <div className="mx-auto max-w-[1200px] px-4">
-          <SectionTitle title="시설 안내" subtitle="쾌적한 학습 환경을 제공합니다" />
+          <SectionTitle title="시설 안내" subtitle={<><span className="text-primary">쾌적한</span> 학습 환경을 제공합니다</>} />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
             {FACILITY_PHOTOS.map((photo, i) => (
               <div

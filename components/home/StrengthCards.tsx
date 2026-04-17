@@ -7,8 +7,8 @@ export default function StrengthCards() {
     <section className="py-16 md:py-24">
       <div className="mx-auto max-w-[1200px] px-4 md:px-6">
         <SectionTitle
-          title="성진학원 6가지 강점"
-          subtitle="학생의 성장을 위한 체계적인 교육 시스템"
+          title={<>성진학원 <span className="text-primary">6가지 강점</span></>}
+          subtitle={<>학생의 <span className="text-primary">성장</span>을 위한 체계적인 교육 시스템</>}
         />
         <div className="grid gap-x-6 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
           {strengths.map((s) => (

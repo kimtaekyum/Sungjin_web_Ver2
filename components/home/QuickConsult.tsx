@@ -70,7 +70,7 @@ export default function QuickConsult() {
             </h3>
             <p className="text-sm text-text-sub mb-6 leading-relaxed">
               전화 또는 온라인으로 편하게 상담받으세요.<br />
-              학생에게 맞는 맞춤 학습 플랜을 안내해드립니다.
+              학생에게 맞는 <span className="text-primary font-medium">맞춤 학습 플랜</span>을 안내해드립니다.
             </p>
             <Button variant="primary" href="/contact" className="rounded-lg px-8">
               상담 신청하기

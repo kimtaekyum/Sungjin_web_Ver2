@@ -60,7 +60,7 @@ export default function StatsCounter() {
     <section className="relative bg-surface py-16 md:py-24 overflow-hidden">
       <div className="relative mx-auto max-w-[1200px] px-4 md:px-6">
         <p className="text-center text-base font-medium tracking-[0.15em] text-text-sub mb-10 md:mb-14 md:text-lg">
-          성진학원이 걸어온 길
+          <span className="text-primary">성진학원</span>이 걸어온 길
         </p>
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4 md:gap-12">
           {stats.map((stat, i) => (

@@ -23,7 +23,7 @@ export default function NoticesPage() {
       <div className="mx-auto max-w-[1200px] px-4">
         <SectionTitle
           title="공지사항"
-          subtitle="성진학원의 새로운 소식을 확인하세요"
+          subtitle={<>성진학원의 <span className="text-primary">새로운 소식</span>을 확인하세요</>}
         />
 
         {loading ? (

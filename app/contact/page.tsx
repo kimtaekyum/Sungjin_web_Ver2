@@ -21,7 +21,7 @@ export default function ContactPage() {
         <div className="mx-auto max-w-[1200px] px-4">
           <SectionTitle
             title="상담 & 등록"
-            subtitle="부담 없이 문의해주세요. 영업일 1일 이내 연락드립니다."
+            subtitle={<>부담 없이 문의해주세요. <span className="text-primary">영업일 1일 이내</span> 연락드립니다.</>}
           />
 
           <div className="grid gap-8 md:grid-cols-2 md:items-stretch">
@@ -159,7 +159,7 @@ export default function ContactPage() {
       {/* FAQ */}
       <section className="py-16 md:py-24">
         <div className="mx-auto max-w-[1200px] px-4">
-          <SectionTitle title="자주 묻는 질문" subtitle="궁금한 점을 확인해보세요" />
+          <SectionTitle title="자주 묻는 질문" subtitle={<><span className="text-primary">궁금한 점</span>을 확인해보세요</>} />
           <div className="mx-auto max-w-3xl">
             <Accordion items={faqItems} />
           </div>

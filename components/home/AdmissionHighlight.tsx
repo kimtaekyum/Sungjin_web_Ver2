@@ -10,8 +10,8 @@ export default function AdmissionHighlight() {
 
       <div className="relative mx-auto max-w-[1200px] px-4 md:px-6">
         <SectionTitle
-          title="2026학년도 합격 실적"
-          subtitle="성진학원의 검증된 입시 결과"
+          title={<><span className="text-primary">2026학년도</span> 합격 실적</>}
+          subtitle={<>성진학원의 <span className="text-primary">검증된</span> 입시 결과</>}
         />
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">

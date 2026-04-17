@@ -11,7 +11,7 @@ export default function ProgramPreview() {
       <div className="mx-auto max-w-[1200px] px-4 md:px-6">
         <SectionTitle
           title="교육과정 안내"
-          subtitle="초등부부터 고등부까지, 단계별 맞춤 교육"
+          subtitle={<>초등부부터 고등부까지, 단계별 <span className="text-primary">맞춤</span> 교육</>}
         />
         <div className="grid gap-6 md:grid-cols-3 md:gap-8">
           {programs.map((p, idx) => (

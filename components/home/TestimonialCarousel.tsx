@@ -14,7 +14,7 @@ export default function TestimonialCarousel() {
           학부모 후기
         </p>
         <h2 className="text-center text-[22px] font-medium text-[#444444] md:text-3xl">
-          성진학원을 선택한 이유
+          성진학원을 <span className="text-primary">선택한 이유</span>
         </h2>
       </div>
 

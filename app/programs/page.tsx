@@ -17,7 +17,7 @@ export default function ProgramsPage() {
         <div className="mx-auto max-w-[1200px] px-4">
           <SectionTitle
             title="수업 안내"
-            subtitle="초등부부터 고등부까지, 단계별 맞춤 교육 프로그램"
+            subtitle={<>초등부부터 고등부까지, 단계별 <span className="text-primary">맞춤</span> 교육 프로그램</>}
           />
 
           <div className="space-y-12">
@@ -88,10 +88,10 @@ export default function ProgramsPage() {
 
           {/* 운영 규정 */}
           <div className="mt-16">
-            <SectionTitle title="운영 규정 안내" subtitle="투명하고 체계적인 학원 운영" />
+            <SectionTitle title="운영 규정 안내" subtitle={<><span className="text-primary">투명</span>하고 <span className="text-primary">체계적인</span> 학원 운영</>} />
             <div className="grid gap-4 md:grid-cols-3">
               <Card hover={false} className="p-5 md:p-6">
-                <h3 className="text-base font-medium text-[#444444] mb-4">숙제 및 테스트</h3>
+                <h3 className="text-base font-medium text-primary mb-4">숙제 및 테스트</h3>
                 <ul className="space-y-2 text-sm text-text-sub">
                   <li>• 수학: 백지 개념 테스트, 실전 모의고사로 이해도 점검</li>
                   <li>• 영문법: 문제 풀이 + 첨삭 선생님이 직접 발음 검사</li>
@@ -100,7 +100,7 @@ export default function ProgramsPage() {
               </Card>
 
               <Card hover={false} className="p-5 md:p-6">
-                <h3 className="text-base font-medium text-[#444444] mb-4">결석 및 보강</h3>
+                <h3 className="text-base font-medium text-primary mb-4">결석 및 보강</h3>
                 <ul className="space-y-2 text-sm text-text-sub">
                   <li>• 고등 수학·중고등 국어: 매 수업 영상 촬영 → 보강 활용</li>
                   <li>• 결석·복습 필요 시 영상 보충 수강 가능</li>
@@ -110,7 +110,7 @@ export default function ProgramsPage() {
               </Card>
 
               <Card hover={false} className="p-5 md:p-6">
-                <h3 className="text-base font-medium text-[#444444] mb-4">상담 및 소통</h3>
+                <h3 className="text-base font-medium text-primary mb-4">상담 및 소통</h3>
                 <ul className="space-y-2 text-sm text-text-sub">
                   <li>• 매일 카톡: 초·중등 수업 출결·숙제 피드백</li>
                   <li>• 월간 리포트: 고사 없는 달에 고사결과·자기평가 보고서</li>

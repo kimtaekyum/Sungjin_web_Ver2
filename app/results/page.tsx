@@ -17,8 +17,8 @@ export default function ResultsPage() {
       <section className="py-16 md:py-24">
         <div className="mx-auto max-w-[1200px] px-4">
           <SectionTitle
-            title="2026학년도 대학 합격 실적"
-            subtitle="성진학원의 검증된 입시 결과"
+            title={<><span className="text-primary">2026학년도</span> 대학 합격 실적</>}
+            subtitle={<>성진학원의 <span className="text-primary">검증된</span> 입시 결과</>}
           />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
             {admissionResults.map((r, i) => {
@@ -78,8 +78,8 @@ export default function ResultsPage() {
       <section className="bg-surface py-16 md:py-24">
         <div className="mx-auto max-w-[1200px] px-4">
           <SectionTitle
-            title="중등 성적 향상 사례"
-            subtitle="눈에 보이는 성적 변화"
+            title={<>중등 <span className="text-primary">성적 향상</span> 사례</>}
+            subtitle={<><span className="text-primary">눈에 보이는</span> 성적 변화</>}
           />
           <div className="grid gap-3 grid-cols-2 md:gap-5 lg:grid-cols-3">
             {scoreImprovements.map((s, i) => (
