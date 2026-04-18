@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import SectionTitle from "@/components/ui/SectionTitle";
 import FaIcon from "@/components/ui/FaIcon";
 import { strengths, type StrengthPhoto } from "@/data/strengths";
@@ -63,6 +63,44 @@ function PhotoFan({ photos, visible, overlap = "normal", mobileHeight }: { photo
 
 export default function StrengthCards() {
   const [activeId, setActiveId] = useState<number | null>(null);
+  const [scrollActiveId, setScrollActiveId] = useState<number | null>(null);
+  const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const isMobile = useRef(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    isMobile.current = mq.matches;
+    const handler = (e: MediaQueryListEvent) => { isMobile.current = e.matches; };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!isMobile.current) return;
+        entries.forEach((entry) => {
+          const id = Number(entry.target.getAttribute("data-strength-id"));
+          if (entry.isIntersecting) {
+            setScrollActiveId(id);
+          } else {
+            setScrollActiveId((prev) => (prev === id ? null : prev));
+          }
+        });
+      },
+      { rootMargin: "-50% 0px -50% 0px", threshold: 0 }
+    );
+
+    cardRefs.current.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  const setCardRef = useCallback((id: number, el: HTMLDivElement | null) => {
+    if (el) cardRefs.current.set(id, el);
+    else cardRefs.current.delete(id);
+  }, []);
+
+  const visibleId = activeId ?? scrollActiveId;
 
   return (
     <section className="py-16 md:py-24">
@@ -75,23 +113,21 @@ export default function StrengthCards() {
           {strengths.map((s) => (
             <div
               key={s.id}
+              ref={(el) => s.photos && setCardRef(s.id, el)}
+              data-strength-id={s.id}
               className="relative"
               onMouseEnter={() => s.photos && setActiveId(s.id)}
               onMouseLeave={() => setActiveId(null)}
-              onClick={() => {
-                if (!s.photos) return;
-                setActiveId(activeId === s.id ? null : s.id);
-              }}
             >
               {s.photos && (
-                <PhotoFan photos={s.photos} visible={activeId === s.id} overlap={s.fanOverlap} mobileHeight={s.fanMobileHeight} />
+                <PhotoFan photos={s.photos} visible={visibleId === s.id} overlap={s.fanOverlap} mobileHeight={s.fanMobileHeight} />
               )}
               <div
                 className={`group rounded-xl bg-surface border p-7 transition-all duration-200 cursor-default ${
-                  activeId === s.id
+                  visibleId === s.id
                     ? "border-primary/40 shadow-[0_4px_16px_-4px_rgba(184,29,34,0.15)]"
                     : "border-border/50 hover:border-[#9F9E9E]"
-                } ${s.photos ? "cursor-pointer md:cursor-default" : ""}`}
+                }`}
               >
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#FDF2F2] flex items-center justify-center text-primary">
