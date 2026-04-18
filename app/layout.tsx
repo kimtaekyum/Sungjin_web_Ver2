@@ -54,6 +54,13 @@ export const metadata: Metadata = {
     description:
       "신월동 30년 전통 입시 전문 학원. 서울대·포항공대 합격. 1대1 밀착 첨삭 시스템.",
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   robots: {
     index: true,
     follow: true,
