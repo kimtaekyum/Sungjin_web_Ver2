@@ -1,6 +1,7 @@
 export interface StrengthPhoto {
   src: string;
   ratio: number;
+  scale?: number;
 }
 
 export interface Strength {
@@ -9,6 +10,8 @@ export interface Strength {
   description: string;
   icon: string;
   photos?: StrengthPhoto[];
+  fanOverlap?: "tight" | "normal" | "loose";
+  fanMobileHeight?: number;
 }
 
 export const strengths: Strength[] = [
@@ -19,8 +22,8 @@ export const strengths: Strength[] = [
       "매년 입시 정책 변화와 주변 고등학교 특성을 분석하는 세미나를 진행합니다.",
     icon: "graduation-cap",
     photos: [
-      { src: "/images/strengths/seminar/1.png", ratio: 1.0 },
       { src: "/images/strengths/seminar/2.jpeg", ratio: 1.334 },
+      { src: "/images/strengths/seminar/1.png", ratio: 1.0, scale: 1.25 },
       { src: "/images/strengths/seminar/3.jpeg", ratio: 1.334 },
     ],
   },
@@ -32,7 +35,7 @@ export const strengths: Strength[] = [
     icon: "pencil",
     photos: [
       { src: "/images/strengths/tutoring/1.jpeg", ratio: 1.334 },
-      { src: "/images/strengths/tutoring/2.jpeg", ratio: 0.562 },
+      { src: "/images/strengths/tutoring/2.jpeg", ratio: 0.562, scale: 1.25 },
       { src: "/images/strengths/tutoring/3.jpeg", ratio: 1.333 },
     ],
   },
@@ -44,9 +47,10 @@ export const strengths: Strength[] = [
     icon: "comments",
     photos: [
       { src: "/images/strengths/classtalk/1.png", ratio: 0.981 },
-      { src: "/images/strengths/classtalk/2.png", ratio: 0.952 },
+      { src: "/images/strengths/classtalk/2.png", ratio: 0.952, scale: 1.25 },
       { src: "/images/strengths/classtalk/3.png", ratio: 0.626 },
     ],
+    fanOverlap: "loose",
   },
   {
     id: 4,
@@ -58,6 +62,8 @@ export const strengths: Strength[] = [
       { src: "/images/strengths/roadmap/1.jpeg", ratio: 0.562 },
       { src: "/images/strengths/roadmap/2.jpeg", ratio: 0.709 },
     ],
+    fanOverlap: "loose",
+    fanMobileHeight: 210,
   },
   {
     id: 5,

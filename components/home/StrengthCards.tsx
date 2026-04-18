@@ -8,12 +8,15 @@ import { strengths, type StrengthPhoto } from "@/data/strengths";
 const FAN_ANGLES = [-12, 0, 12];
 const FAN_ANGLES_2 = [-8, 8];
 
-const H_MOBILE_3 = 121;
-const H_MOBILE_2 = 160;
+const H_MOBILE_3 = 140;
+const H_MOBILE_2 = 175;
 const H_DESKTOP = 209;
 
-function PhotoFan({ photos, visible }: { photos: StrengthPhoto[]; visible: boolean }) {
+function PhotoFan({ photos, visible, overlap = "normal", mobileHeight }: { photos: StrengthPhoto[]; visible: boolean; overlap?: "tight" | "normal" | "loose"; mobileHeight?: number }) {
   const angles = photos.length === 2 ? FAN_ANGLES_2 : FAN_ANGLES;
+  const overlapClass = overlap === "loose"
+    ? "-mx-0.5 md:-mx-1"
+    : photos.length === 2 ? "-mx-2 md:-mx-1" : "-mx-4 md:-mx-3";
   return (
     <div
       className={`absolute -top-4 left-1/2 -translate-x-1/2 z-20 flex items-end justify-center pointer-events-none transition-all duration-300 ${
@@ -21,13 +24,15 @@ function PhotoFan({ photos, visible }: { photos: StrengthPhoto[]; visible: boole
       }`}
     >
       {photos.map((p, i) => {
-        const hM = photos.length === 2 ? H_MOBILE_2 : H_MOBILE_3;
+        const s = p.scale ?? 1;
+        const hM = Math.round((mobileHeight ?? (photos.length === 2 ? H_MOBILE_2 : H_MOBILE_3)) * s);
         const wM = Math.round(hM * p.ratio);
-        const wD = Math.round(H_DESKTOP * p.ratio);
+        const hD = Math.round(H_DESKTOP * s);
+        const wD = Math.round(hD * p.ratio);
         return (
           <div
             key={i}
-            className={`flex-shrink-0 ${photos.length === 2 ? "-mx-0.5 md:-mx-1" : "-mx-1.5 md:-mx-3"}`}
+            className={`flex-shrink-0 ${overlapClass}`}
             style={{
               transform: `rotate(${angles[i]}deg)`,
               zIndex: i === Math.floor(photos.length / 2) ? 3 : i === 0 ? 1 : 2,
@@ -39,7 +44,7 @@ function PhotoFan({ photos, visible }: { photos: StrengthPhoto[]; visible: boole
                 "--w-m": `${wM}px`,
                 "--h-m": `${hM}px`,
                 "--w-d": `${wD}px`,
-                "--h-d": `${H_DESKTOP}px`,
+                "--h-d": `${hD}px`,
               } as React.CSSProperties}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -79,7 +84,7 @@ export default function StrengthCards() {
               }}
             >
               {s.photos && (
-                <PhotoFan photos={s.photos} visible={activeId === s.id} />
+                <PhotoFan photos={s.photos} visible={activeId === s.id} overlap={s.fanOverlap} mobileHeight={s.fanMobileHeight} />
               )}
               <div
                 className={`group rounded-xl bg-surface border p-7 transition-all duration-200 cursor-default ${
