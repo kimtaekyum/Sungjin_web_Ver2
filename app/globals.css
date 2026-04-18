@@ -135,16 +135,16 @@ html {
 
 /* Photo strip marquee */
 .animate-marquee {
-  animation: scroll-left 50s linear infinite;
+  animation: scroll-left 65s linear infinite;
 }
 .animate-marquee-reverse {
-  animation: scroll-right 50s linear infinite;
+  animation: scroll-right 65s linear infinite;
 }
 @media (max-width: 767px) {
   .animate-marquee {
-    animation-duration: 35s;
+    animation-duration: 50s;
   }
   .animate-marquee-reverse {
-    animation-duration: 35s;
+    animation-duration: 50s;
   }
 }
