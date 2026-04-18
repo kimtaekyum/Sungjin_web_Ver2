@@ -10,6 +10,7 @@ type Body = {
   subjects?: unknown;
   preferredTime?: unknown;
   memo?: unknown;
+  turnstileToken?: unknown;
 };
 
 const ALLOWED_GRADES = ["초등", "중등", "고등"] as const;
@@ -57,6 +58,24 @@ export async function POST(request: Request) {
     body = (await request.json()) as Body;
   } catch {
     return NextResponse.json({ error: "잘못된 요청 형식입니다." }, { status: 400 });
+  }
+
+  // ----- 0. Turnstile 검증 (키가 설정된 경우에만) -----
+  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+  if (turnstileSecret) {
+    const token = typeof body.turnstileToken === "string" ? body.turnstileToken : "";
+    if (!token) {
+      return NextResponse.json({ error: "보안 인증을 완료해주세요." }, { status: 400 });
+    }
+    const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `secret=${encodeURIComponent(turnstileSecret)}&response=${encodeURIComponent(token)}`,
+    });
+    const verifyData = await verifyRes.json() as { success: boolean };
+    if (!verifyData.success) {
+      return NextResponse.json({ error: "보안 인증에 실패했습니다. 다시 시도해주세요." }, { status: 403 });
+    }
   }
 
   // ----- 1. 검증 -----

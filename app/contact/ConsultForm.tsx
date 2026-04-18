@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import Button from "@/components/ui/Button";
 import FaIcon from "@/components/ui/FaIcon";
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export default function ConsultForm() {
   const [formData, setFormData] = useState({
@@ -16,6 +19,8 @@ export default function ConsultForm() {
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   const handleSubjectToggle = (subject: string) => {
     setFormData((prev) => ({
@@ -48,7 +53,7 @@ export default function ConsultForm() {
       const res = await fetch("/api/consultations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, turnstileToken }),
       });
       const data: { ok?: boolean; error?: string } = await res.json().catch(() => ({}));
 
@@ -61,6 +66,8 @@ export default function ConsultForm() {
       setError("네트워크 오류로 신청에 실패했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setSending(false);
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
     }
   };
 
@@ -199,7 +206,17 @@ export default function ConsultForm() {
         </div>
       )}
 
-      <Button type="submit" variant="primary" className="w-full" disabled={sending}>
+      {TURNSTILE_SITE_KEY && (
+        <Turnstile
+          ref={turnstileRef}
+          siteKey={TURNSTILE_SITE_KEY}
+          onSuccess={setTurnstileToken}
+          onExpire={() => setTurnstileToken(null)}
+          options={{ theme: "light", size: "flexible" }}
+        />
+      )}
+
+      <Button type="submit" variant="primary" className="w-full" disabled={sending || (!!TURNSTILE_SITE_KEY && !turnstileToken)}>
         {sending ? "신청 중..." : "상담 신청하기"}
       </Button>
       <p className="text-xs text-text-sub text-center">
