@@ -8,12 +8,12 @@ import { ACADEMY_INFO } from "@/lib/constants";
 import { philosophies } from "@/data/philosophy";
 
 const FACILITY_PHOTOS = [
-  { src: "/images/시설사진1.jpg", alt: "성진학원 시설 1" },
-  { src: "/images/시설사진2.jpg", alt: "성진학원 시설 2" },
-  { src: "/images/시설사진3.jpg", alt: "성진학원 시설 3" },
-  { src: "/images/시설사진4.jpg", alt: "성진학원 시설 4" },
-  { src: "/images/시설사진5.jpg", alt: "성진학원 시설 5" },
-  { src: "/images/시설사진6.jpg", alt: "성진학원 시설 6" },
+  { src: "/images/facility-1.jpg", alt: "성진학원 시설 1" },
+  { src: "/images/facility-2.jpg", alt: "성진학원 시설 2" },
+  { src: "/images/facility-3.jpg", alt: "성진학원 시설 3" },
+  { src: "/images/facility-4.jpg", alt: "성진학원 시설 4" },
+  { src: "/images/facility-5.jpg", alt: "성진학원 시설 5" },
+  { src: "/images/facility-6.jpg", alt: "성진학원 시설 6" },
 ];
 
 export const metadata: Metadata = {

@@ -47,7 +47,7 @@ export default function ContactPage() {
                   className="group relative block overflow-hidden rounded-xl aspect-video mb-4 border border-border/50 hover:border-primary/40 transition-colors"
                 >
                   <Image
-                    src="/images/지도.png"
+                    src="/images/map.png"
                     alt="성진학원 위치 지도"
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
