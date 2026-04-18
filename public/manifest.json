@@ -1,0 +1,22 @@
+{
+  "name": "성진학원",
+  "short_name": "성진학원",
+  "description": "신월동 30년 전통 1대1 밀착 첨삭 입시 전문 학원",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFAFA",
+  "theme_color": "#B81D22",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

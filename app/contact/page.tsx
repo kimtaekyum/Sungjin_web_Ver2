@@ -5,17 +5,20 @@ import Accordion from "@/components/ui/Accordion";
 import FaIcon from "@/components/ui/FaIcon";
 import { ACADEMY_INFO } from "@/lib/constants";
 import { faqItems } from "@/data/faq";
+import { FaqJsonLd } from "@/components/seo/JsonLd";
 import ConsultForm from "./ConsultForm";
 
 export const metadata: Metadata = {
   title: "상담 & 등록 | 성진학원 - 무료 상담 신청",
   description:
     "성진학원 온라인 상담 신청. 초4~고3 국영수 입시 전문. 전화, 카카오톡, 온라인 폼으로 편하게 문의하세요.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {
   return (
     <>
+      <FaqJsonLd items={faqItems} />
       {/* 상담 신청 + 오시는 길 */}
       <section className="py-16 md:py-24">
         <div className="mx-auto max-w-[1200px] px-4">

@@ -1,4 +1,15 @@
-export const revalidate = 3600; // 1 hour
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "성진학원 | 신월동 30년 전통 1대1 밀착 첨삭 입시 전문",
+  description:
+    "신월동 성진학원 - 30년 전통의 1대1 밀착 첨삭 입시 전문 학원. 서울대·포항공대 합격 실적. 초4~고3 국영수 전 과목. 무료 상담 신청하세요.",
+  alternates: {
+    canonical: "/",
+  },
+};
+
+export const revalidate = 3600;
 
 import HeroSection from "@/components/home/HeroSection";
 import PhotoStrip from "@/components/home/PhotoStrip";

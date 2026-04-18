@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import SectionTitle from "@/components/ui/SectionTitle";
 import { ACADEMY_INFO } from "@/lib/constants";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "개인정보 처리방침 | 성진학원",
   description: "성진학원 개인정보 처리방침",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

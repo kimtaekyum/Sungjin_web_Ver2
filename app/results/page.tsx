@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "합격 실적 | 2026 서울대·포항공대 합격 - 성진학원",
   description:
     "성진학원 2026학년도 합격 실적. 서울대 약대, 포항공대, 연세대, 고려대, 성균관대 등 상위권 대학 합격. 중등 성적 향상 사례.",
+  alternates: { canonical: "/results" },
 };
 
 export default function ResultsPage() {

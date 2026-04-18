@@ -20,6 +20,7 @@ export const metadata: Metadata = {
   title: "학원소개 | 성진학원 - 신월동 30년 입시 전문 학원",
   description:
     "성진학원의 교육철학과 강점을 소개합니다. 1대1 밀착 첨삭, 대입 세미나, 클래스톡톡 등 체계적인 교육 시스템.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {

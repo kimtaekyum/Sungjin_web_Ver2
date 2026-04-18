@@ -5,6 +5,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import FloatingCTA from "@/components/layout/FloatingCTA";
+import { LocalBusinessJsonLd } from "@/components/seo/JsonLd";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -54,6 +55,7 @@ export const metadata: Metadata = {
     description:
       "신월동 30년 전통 입시 전문 학원. 서울대·포항공대 합격. 1대1 밀착 첨삭 시스템.",
   },
+  manifest: "/manifest.json",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -81,6 +83,7 @@ export default function RootLayout({
   return (
     <html lang="ko" className={`h-full antialiased ${montserrat.variable}`}>
       <body className="min-h-full flex flex-col">
+        <LocalBusinessJsonLd />
         <Header />
         <main className="flex-1 pt-16 md:pt-0">{children}</main>
         <Footer />
