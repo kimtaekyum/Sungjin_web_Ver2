@@ -8,7 +8,8 @@ import { strengths, type StrengthPhoto } from "@/data/strengths";
 const FAN_ANGLES = [-12, 0, 12];
 const FAN_ANGLES_2 = [-8, 8];
 
-const H_MOBILE = 121;
+const H_MOBILE_3 = 121;
+const H_MOBILE_2 = 160;
 const H_DESKTOP = 209;
 
 function PhotoFan({ photos, visible }: { photos: StrengthPhoto[]; visible: boolean }) {
@@ -20,7 +21,8 @@ function PhotoFan({ photos, visible }: { photos: StrengthPhoto[]; visible: boole
       }`}
     >
       {photos.map((p, i) => {
-        const wM = Math.round(H_MOBILE * p.ratio);
+        const hM = photos.length === 2 ? H_MOBILE_2 : H_MOBILE_3;
+        const wM = Math.round(hM * p.ratio);
         const wD = Math.round(H_DESKTOP * p.ratio);
         return (
           <div
@@ -35,7 +37,7 @@ function PhotoFan({ photos, visible }: { photos: StrengthPhoto[]; visible: boole
               className="photo-card rounded-lg overflow-hidden shadow-lg border-2 border-white"
               style={{
                 "--w-m": `${wM}px`,
-                "--h-m": `${H_MOBILE}px`,
+                "--h-m": `${hM}px`,
                 "--w-d": `${wD}px`,
                 "--h-d": `${H_DESKTOP}px`,
               } as React.CSSProperties}
