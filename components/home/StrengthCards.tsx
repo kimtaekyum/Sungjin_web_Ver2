@@ -64,7 +64,7 @@ export default function StrengthCards() {
           title={<>성진학원 <span className="text-primary">6가지 강점</span></>}
           subtitle={<>학생의 <span className="text-primary">성장</span>을 위한 체계적인 교육 시스템</>}
         />
-        <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3 pt-6">
+        <div className="grid gap-x-6 gap-y-6 md:gap-y-14 sm:grid-cols-2 lg:grid-cols-3 pt-6">
           {strengths.map((s) => (
             <div
               key={s.id}

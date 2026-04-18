@@ -3,9 +3,9 @@ import Image from "next/image";
 import Card from "@/components/ui/Card";
 import SectionTitle from "@/components/ui/SectionTitle";
 import FaIcon from "@/components/ui/FaIcon";
+import StrengthCards from "@/components/home/StrengthCards";
 import { ACADEMY_INFO } from "@/lib/constants";
 import { philosophies } from "@/data/philosophy";
-import { strengths } from "@/data/strengths";
 
 const FACILITY_PHOTOS = [
   { src: "/images/시설사진1.jpg", alt: "성진학원 시설 1" },
@@ -65,31 +65,7 @@ export default function AboutPage() {
       </section>
 
       {/* 강점 6가지 상세 */}
-      <section className="bg-surface py-16 md:py-24">
-        <div className="mx-auto max-w-[1200px] px-4">
-          <SectionTitle title={<>성진학원 <span className="text-primary">6가지 강점</span></>} subtitle={<>학생의 <span className="text-primary">성장</span>을 위한 체계적인 교육 시스템</>} />
-          <div className="space-y-6">
-            {strengths.map((s) => (
-              <div
-                key={s.id}
-                className="rounded-xl bg-bg p-6 md:p-8 flex items-start gap-5"
-              >
-                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#FDF2F2] flex items-center justify-center text-primary">
-                  <FaIcon name={s.icon} className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-[#444444] mb-2">
-                    {s.title}
-                  </h3>
-                  <p className="text-text-sub leading-relaxed text-[15px]">
-                    {s.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <StrengthCards />
 
       {/* 시설 안내 */}
       <section className="py-16 md:py-24">
