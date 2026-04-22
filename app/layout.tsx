@@ -73,6 +73,11 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  verification: {
+    other: {
+      "naver-site-verification": "a2aa4e19e29d013bba4a902e32bd2a441e8e9422",
+    },
+  },
 };
 
 export default function RootLayout({
