@@ -153,8 +153,8 @@ export default function ConsultForm() {
         <span id="consult-subjects-label" className="block text-sm font-medium text-text mb-2">
           관심 과목 <span className="text-text-sub font-normal">(선택)</span>
         </span>
-        <div className="flex gap-2" role="group" aria-labelledby="consult-subjects-label">
-          {["국어", "영어", "수학"].map((subject) => (
+        <div className="flex flex-wrap gap-2" role="group" aria-labelledby="consult-subjects-label">
+          {["국어", "영어", "수학", "과학"].map((subject) => (
             <button
               key={subject}
               type="button"

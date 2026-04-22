@@ -60,6 +60,21 @@ export default function ProgramsPage() {
                           </li>
                         ))}
                       </ul>
+                      {p.details && p.details.length > 0 && (
+                        <>
+                          <h3 className="text-sm font-medium text-[#444444] mb-3">학습 구성</h3>
+                          <ul className="space-y-2 mb-6">
+                            {p.details.map((d, i) => (
+                              <li key={i} className="flex items-start gap-2 text-sm text-text-sub">
+                                <svg className="h-4 w-4 mt-0.5 shrink-0 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                                  <circle cx="10" cy="10" r="3" />
+                                </svg>
+                                {d}
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
                     </div>
 
                     {/* Right: Tuition + CTA */}
@@ -156,6 +171,9 @@ export default function ProgramsPage() {
                   </tr>
                 </tbody>
               </table>
+              <p className="px-3 py-3 text-xs text-text-sub md:px-6 md:text-sm">
+                ※ 고1 통합과학 — 25만원 (신규 개설)
+              </p>
             </div>
           </div>
         </div>

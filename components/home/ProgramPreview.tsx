@@ -3,7 +3,7 @@ import Button from "@/components/ui/Button";
 import FaIcon from "@/components/ui/FaIcon";
 import { programs } from "@/data/programs";
 
-const icons = ["ruler", "book", "bullseye"];
+const icons = ["ruler", "book", "bullseye", "flask"];
 
 export default function ProgramPreview() {
   return (
@@ -13,13 +13,13 @@ export default function ProgramPreview() {
           title="교육과정 안내"
           subtitle={<>초등부부터 고등부까지, 단계별 <span className="text-primary">맞춤</span> 교육</>}
         />
-        <div className="grid gap-6 md:grid-cols-3 md:gap-8">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 md:gap-6">
           {programs.map((p, idx) => (
             <div
               key={p.slug}
-              className="group rounded-xl bg-surface overflow-hidden border border-border/50 hover:border-[#9F9E9E] transition-all duration-200"
+              className="group rounded-xl bg-surface overflow-hidden border border-border/50 hover:border-[#9F9E9E] transition-all duration-200 flex"
             >
-              <div className="p-7 md:p-8">
+              <div className="p-7 md:p-8 flex flex-col w-full">
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-10 h-10 rounded-lg bg-[#FDF2F2] flex items-center justify-center text-primary">
                     <FaIcon name={icons[idx]} className="w-5 h-5" />
@@ -54,13 +54,15 @@ export default function ProgramPreview() {
                   ))}
                 </ul>
 
-                <Button
-                  variant="ghost"
-                  href="/contact"
-                  className="w-full text-sm group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all"
-                >
-                  {p.ctaText}
-                </Button>
+                <div className="mt-auto">
+                  <Button
+                    variant="ghost"
+                    href="/contact"
+                    className="w-full text-sm group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all"
+                  >
+                    {p.ctaText}
+                  </Button>
+                </div>
               </div>
             </div>
           ))}

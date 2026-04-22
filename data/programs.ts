@@ -5,6 +5,7 @@ export interface Program {
   subjects: string[];
   description: string;
   highlights: string[];
+  details?: string[];
   tuition: { subject: string; price: string }[];
   ctaText: string;
 }
@@ -65,5 +66,22 @@ export const programs: Program[] = [
       { subject: "국어", price: "26만원" },
     ],
     ctaText: "고등부 상담받기",
+  },
+  {
+    slug: "science-high1",
+    title: "고1 통합과학",
+    target: "고1",
+    subjects: ["통합과학"],
+    description:
+      "개념부터 시험 대비까지, 고1 통합과학을 체계적인 학습 루틴으로 완성합니다. 배운 내용을 스스로 정리하고 오답을 교정하며, 학교별 교과서에 맞춘 문제로 내신을 준비합니다. 선생님이 직접 자필로 정리해주는 요점노트로 핵심까지 잡아드립니다.",
+    highlights: [
+      "생각노트 + 오답노트로 학습 완전 체화",
+      "학교별 교과서 출판사 맞춤 시험 대비",
+      "선생님 자필 요점정리 제공",
+    ],
+    tuition: [
+      { subject: "통합과학", price: "25만원" },
+    ],
+    ctaText: "통합과학 상담받기",
   },
 ];

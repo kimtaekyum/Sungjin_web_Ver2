@@ -15,7 +15,7 @@ type Body = {
 
 const ALLOWED_GRADES = ["초등", "중등", "고등"] as const;
 type Grade = (typeof ALLOWED_GRADES)[number];
-const ALLOWED_SUBJECTS = ["국어", "영어", "수학"] as const;
+const ALLOWED_SUBJECTS = ["국어", "영어", "수학", "과학"] as const;
 
 const RATE_LIMIT_WINDOW_SEC = 300; // 5분
 const RATE_LIMIT_MAX = 3;
