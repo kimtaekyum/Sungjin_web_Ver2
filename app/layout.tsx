@@ -75,7 +75,11 @@ export const metadata: Metadata = {
   },
   verification: {
     other: {
-      "naver-site-verification": "a2aa4e19e29d013bba4a902e32bd2a441e8e9422",
+      // 네이버 서치어드바이저 소유확인 (구/신 등록 둘 다 보존)
+      "naver-site-verification": [
+        "a2aa4e19e29d013bba4a902e32bd2a441e8e9422",
+        "a81eff3fe617d7a7ee84f1a968eb9815b1e6196d",
+      ],
     },
   },
 };
