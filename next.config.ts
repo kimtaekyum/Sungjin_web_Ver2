@@ -51,6 +51,17 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // 옛 PHP 사이트의 죽은 URL을 새 페이지로 영구(308) 이동시킨다.
+  // board/list/view*.php 는 모두 예전 수업·상품 목록이었으므로 /programs 로 보낸다.
+  // (구글에 남은 옛 색인을 정리하고, 옛 링크로 들어온 방문자도 새 사이트로 살린다)
+  async redirects() {
+    const legacyPhpPages = ["board", "board_page", "view", "view_page", "list"];
+    return legacyPhpPages.map((page) => ({
+      source: `/${page}.php`,
+      destination: "/programs",
+      permanent: true,
+    }));
+  },
 };
 
 export default nextConfig;
