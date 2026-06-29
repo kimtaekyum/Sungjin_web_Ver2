@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseServer";
+import { sendConsultationAlimtalk } from "@/lib/alimtalk";
 
 export const dynamic = "force-dynamic";
 
@@ -154,6 +155,20 @@ export async function POST(request: Request) {
     );
   }
 
-  // Phase 4에서 이 지점에 알림톡 발송 로직 추가
+  // 상담 저장 성공 후 관리자(원장님)에게 카카오 알림톡 발송.
+  // 발송이 실패해도 상담 저장은 이미 끝났으므로 사용자 응답에는 영향 주지 않는다.
+  try {
+    await sendConsultationAlimtalk({
+      parentName: parentNameRaw,
+      phoneDisplay,
+      grade,
+      subjects,
+      preferredTime,
+      memo,
+    });
+  } catch (alimtalkError) {
+    console.error("알림톡 발송 실패(상담은 정상 저장됨):", alimtalkError);
+  }
+
   return NextResponse.json({ ok: true });
 }
