@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseServer";
 import { sendConsultationAlimtalk } from "@/lib/alimtalk";
+import { GRADES, levelFromGrade } from "@/lib/schools";
 
 export const dynamic = "force-dynamic";
 
@@ -8,15 +9,15 @@ type Body = {
   parentName?: unknown;
   phone?: unknown;
   grade?: unknown;
+  school?: unknown;
   subjects?: unknown;
   preferredTime?: unknown;
   memo?: unknown;
   turnstileToken?: unknown;
 };
 
-const ALLOWED_GRADES = ["초등", "중등", "고등"] as const;
-type Grade = (typeof ALLOWED_GRADES)[number];
 const ALLOWED_SUBJECTS = ["국어", "영어", "수학", "과학"] as const;
+const SCHOOL_MAX_LEN = 30;
 
 const RATE_LIMIT_WINDOW_SEC = 300; // 5분
 const RATE_LIMIT_MAX = 3;
@@ -98,14 +99,23 @@ export async function POST(request: Request) {
   }
   const phoneDisplay = formatPhoneDisplay(normalizedPhone);
 
-  const gradeRaw = typeof body.grade === "string" ? body.grade : "";
-  if (!ALLOWED_GRADES.includes(gradeRaw as Grade)) {
+  const gradeDetailRaw = typeof body.grade === "string" ? body.grade : "";
+  if (!GRADES.includes(gradeDetailRaw)) {
     return NextResponse.json(
       { error: "학년을 선택해주세요." },
       { status: 400 }
     );
   }
-  const grade = gradeRaw as Grade;
+  const gradeDetail = gradeDetailRaw;
+  // 기존 grade 컬럼(초등/중등/고등)에 넣을 학교급을 상세 학년에서 파생한다.
+  const level = levelFromGrade(gradeDetail);
+  if (!level) {
+    return NextResponse.json({ error: "학년을 선택해주세요." }, { status: 400 });
+  }
+
+  // 학교: 목록 선택값 또는 "기타" 직접입력값. 자유 입력이라 길이만 제한(없으면 null).
+  const schoolRaw = typeof body.school === "string" ? body.school.trim() : "";
+  const school = schoolRaw ? schoolRaw.slice(0, SCHOOL_MAX_LEN) : null;
 
   const subjects = Array.isArray(body.subjects)
     ? body.subjects
@@ -141,7 +151,9 @@ export async function POST(request: Request) {
     parent_name: parentNameRaw,
     phone: normalizedPhone,
     phone_display: phoneDisplay,
-    grade,
+    grade: level, // 기존 컬럼: 학교급(초등/중등/고등)
+    grade_detail: gradeDetail, // 신규: 상세 학년(예: 초등학교 2학년)
+    school, // 신규: 학교명
     subjects,
     preferred_time: preferredTime,
     memo,
@@ -161,7 +173,8 @@ export async function POST(request: Request) {
     await sendConsultationAlimtalk({
       parentName: parentNameRaw,
       phoneDisplay,
-      grade,
+      gradeDetail,
+      school,
       subjects,
       preferredTime,
       memo,

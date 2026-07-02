@@ -870,6 +870,16 @@ export default function AdminPage() {
                           >
                             {c.phone_display}
                           </a>
+                          {c.grade_detail && (
+                            <span className="text-text-sub whitespace-nowrap">
+                              {c.grade_detail}
+                            </span>
+                          )}
+                          {c.school && (
+                            <span className="text-text-sub whitespace-nowrap">
+                              학교: {c.school}
+                            </span>
+                          )}
                           {c.subjects.length > 0 && (
                             <span className="text-text-sub whitespace-nowrap">
                               과목: {c.subjects.join(", ")}

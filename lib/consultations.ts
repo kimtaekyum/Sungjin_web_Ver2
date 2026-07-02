@@ -8,7 +8,9 @@ export interface Consultation {
   parent_name: string;
   phone: string;           // 01012345678 (정규화)
   phone_display: string;   // 010-1234-5678 (원본)
-  grade: "초등" | "중등" | "고등";
+  grade: "초등" | "중등" | "고등"; // 학교급 (기존)
+  grade_detail: string | null;     // 상세 학년 (예: 초등학교 2학년)
+  school: string | null;           // 학교명 (예: 강서초)
   subjects: string[];
   preferred_time: string | null;
   memo: string | null;

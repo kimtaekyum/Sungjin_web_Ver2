@@ -41,7 +41,8 @@ export function isAlimtalkConfigured(): boolean {
 export type ConsultationAlimtalkPayload = {
   parentName: string;
   phoneDisplay: string; // 010-1234-5678
-  grade: string;
+  gradeDetail: string; // 예: 초등학교 2학년
+  school: string | null; // 예: 강서초 (없으면 null)
   subjects: string[];
   preferredTime: string | null;
   memo: string | null;
@@ -53,10 +54,15 @@ export type ConsultationAlimtalkPayload = {
  */
 function buildVariables(p: ConsultationAlimtalkPayload): Record<string, string> {
   const memo = (p.memo ?? "").trim();
+  // 승인된 템플릿의 '학년' 변수 하나에 상세 학년 + 학교를 함께 담는다.
+  // 예: "초등학교 2학년 · 강서초"
+  const gradeText = p.school
+    ? `${p.gradeDetail} · ${p.school}`
+    : p.gradeDetail || "미입력";
   return {
     "#{학부모명}": p.parentName || "미입력",
     "#{연락처}": p.phoneDisplay || "미입력",
-    "#{학년}": p.grade || "미입력",
+    "#{학년}": gradeText,
     "#{과목}": p.subjects.length > 0 ? p.subjects.join(", ") : "미선택",
     "#{희망시간}": p.preferredTime?.trim() || "미입력",
     "#{메모}": memo ? memo.slice(0, 500) : "없음",

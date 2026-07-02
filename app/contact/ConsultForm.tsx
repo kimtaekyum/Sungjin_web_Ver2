@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import Button from "@/components/ui/Button";
 import FaIcon from "@/components/ui/FaIcon";
+import { GRADES, SCHOOL_ETC, schoolOptionsForGrade } from "@/lib/schools";
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
@@ -12,6 +13,8 @@ export default function ConsultForm() {
     parentName: "",
     phone: "",
     grade: "",
+    school: "",
+    schoolCustom: "",
     subjects: [] as string[],
     preferredTime: "",
     memo: "",
@@ -29,6 +32,11 @@ export default function ConsultForm() {
         ? prev.subjects.filter((s) => s !== subject)
         : [...prev.subjects, subject],
     }));
+  };
+
+  // 학년이 바뀌면 학교급(초/중/고)이 달라질 수 있으므로 학교 선택을 초기화한다.
+  const handleGradeChange = (grade: string) => {
+    setFormData((prev) => ({ ...prev, grade, school: "", schoolCustom: "" }));
   };
 
   // 010-1234-5678 포맷으로 자동 하이픈
@@ -50,10 +58,15 @@ export default function ConsultForm() {
     setError(null);
     setSending(true);
     try {
+      // "기타" 선택 시 직접 입력한 학교명을 실제 학교 값으로 사용한다.
+      const school =
+        formData.school === SCHOOL_ETC
+          ? formData.schoolCustom.trim()
+          : formData.school;
       const res = await fetch("/api/consultations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, turnstileToken }),
+        body: JSON.stringify({ ...formData, school, turnstileToken }),
       });
       const data: { ok?: boolean; error?: string } = await res.json().catch(() => ({}));
 
@@ -86,7 +99,7 @@ export default function ConsultForm() {
         <button
           onClick={() => {
             setSubmitted(false);
-            setFormData({ parentName: "", phone: "", grade: "", subjects: [], preferredTime: "", memo: "" });
+            setFormData({ parentName: "", phone: "", grade: "", school: "", schoolCustom: "", subjects: [], preferredTime: "", memo: "" });
           }}
           className="text-sm text-primary hover:underline cursor-pointer"
         >
@@ -132,21 +145,57 @@ export default function ConsultForm() {
 
       <div>
         <label htmlFor="consult-grade" className="block text-sm font-medium text-text mb-1.5">
-          학생 <span className="text-danger">*</span>
+          학년 <span className="text-danger">*</span>
         </label>
         <select
           id="consult-grade"
           required
           value={formData.grade}
-          onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+          onChange={(e) => handleGradeChange(e.target.value)}
           className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 bg-white transition-all"
         >
           <option value="">선택하세요</option>
-          <option value="초등">초등학생</option>
-          <option value="중등">중학생</option>
-          <option value="고등">고등학생</option>
+          {GRADES.map((g) => (
+            <option key={g} value={g}>
+              {g}
+            </option>
+          ))}
         </select>
       </div>
+
+      {formData.grade && (
+        <div>
+          <label htmlFor="consult-school" className="block text-sm font-medium text-text mb-1.5">
+            학교 <span className="text-danger">*</span>
+          </label>
+          <select
+            id="consult-school"
+            required
+            value={formData.school}
+            onChange={(e) =>
+              setFormData({ ...formData, school: e.target.value, schoolCustom: "" })
+            }
+            className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 bg-white transition-all"
+          >
+            <option value="">선택하세요</option>
+            {schoolOptionsForGrade(formData.grade).map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          {formData.school === SCHOOL_ETC && (
+            <input
+              type="text"
+              required
+              value={formData.schoolCustom}
+              onChange={(e) => setFormData({ ...formData, schoolCustom: e.target.value })}
+              className="mt-2 w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all"
+              placeholder="학교명을 직접 입력하세요"
+            />
+          )}
+        </div>
+      )}
 
       {/* 선택 입력 */}
       <div>
