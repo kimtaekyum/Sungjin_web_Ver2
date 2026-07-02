@@ -11,6 +11,7 @@ type Body = {
   grade?: unknown;
   school?: unknown;
   subjects?: unknown;
+  preferredDate?: unknown;
   preferredTime?: unknown;
   memo?: unknown;
   turnstileToken?: unknown;
@@ -123,6 +124,45 @@ export async function POST(request: Request) {
         .filter((s) => (ALLOWED_SUBJECTS as readonly string[]).includes(s))
     : [];
 
+  // ----- 상담 희망 날짜 (필수) -----
+  // 당일 신청 허용, 지난 날짜·일요일(휴원일)은 거부. 서버는 UTC이므로 KST로 보정해 비교한다.
+  const preferredDateRaw =
+    typeof body.preferredDate === "string" ? body.preferredDate.trim() : "";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(preferredDateRaw)) {
+    return NextResponse.json(
+      { error: "상담 희망 날짜를 선택해주세요." },
+      { status: 400 }
+    );
+  }
+  const [py, pmon, pday] = preferredDateRaw.split("-").map(Number);
+  const dateUtc = new Date(Date.UTC(py, pmon - 1, pday));
+  const isRealDate =
+    dateUtc.getUTCFullYear() === py &&
+    dateUtc.getUTCMonth() === pmon - 1 &&
+    dateUtc.getUTCDate() === pday;
+  if (!isRealDate) {
+    return NextResponse.json(
+      { error: "상담 희망 날짜가 올바르지 않습니다." },
+      { status: 400 }
+    );
+  }
+  const todayKst = new Date(Date.now() + 9 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+  if (preferredDateRaw < todayKst) {
+    return NextResponse.json(
+      { error: "지난 날짜는 선택할 수 없습니다." },
+      { status: 400 }
+    );
+  }
+  if (dateUtc.getUTCDay() === 0) {
+    return NextResponse.json(
+      { error: "일요일은 휴원일입니다. 다른 날짜를 선택해주세요." },
+      { status: 400 }
+    );
+  }
+  const preferredDate = preferredDateRaw;
+
   const preferredTimeRaw =
     typeof body.preferredTime === "string" ? body.preferredTime.trim() : "";
   const preferredTime = preferredTimeRaw.slice(0, 100) || null;
@@ -155,6 +195,7 @@ export async function POST(request: Request) {
     grade_detail: gradeDetail, // 신규: 상세 학년(예: 초등학교 2학년)
     school, // 신규: 학교명
     subjects,
+    preferred_date: preferredDate,
     preferred_time: preferredTime,
     memo,
   });
@@ -176,6 +217,7 @@ export async function POST(request: Request) {
       gradeDetail,
       school,
       subjects,
+      preferredDate,
       preferredTime,
       memo,
     });

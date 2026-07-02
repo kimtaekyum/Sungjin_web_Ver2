@@ -12,6 +12,7 @@ export interface Consultation {
   grade_detail: string | null;     // 상세 학년 (예: 초등학교 2학년)
   school: string | null;           // 학교명 (예: 강서초)
   subjects: string[];
+  preferred_date: string | null; // YYYY-MM-DD (상담 희망 날짜)
   preferred_time: string | null;
   memo: string | null;
   status: ConsultationStatus;

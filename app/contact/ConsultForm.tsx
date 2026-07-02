@@ -8,6 +8,18 @@ import { GRADES, SCHOOL_ETC, schoolOptionsForGrade } from "@/lib/schools";
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
+/** 로컬(사용자 기기) 기준 오늘 날짜 → YYYY-MM-DD. 당일 상담 신청 허용. */
+function todayLocal(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** YYYY-MM-DD가 일요일인지 (학원 휴원일) */
+function isSunday(dateStr: string): boolean {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d).getDay() === 0;
+}
+
 export default function ConsultForm() {
   const [formData, setFormData] = useState({
     parentName: "",
@@ -15,13 +27,15 @@ export default function ConsultForm() {
     grade: "",
     school: "",
     schoolCustom: "",
-    subjects: [] as string[],
+    preferredDate: "",
     preferredTime: "",
     memo: "",
+    subjects: [] as string[],
   });
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dateError, setDateError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
 
@@ -37,6 +51,17 @@ export default function ConsultForm() {
   // 학년이 바뀌면 학교급(초/중/고)이 달라질 수 있으므로 학교 선택을 초기화한다.
   const handleGradeChange = (grade: string) => {
     setFormData((prev) => ({ ...prev, grade, school: "", schoolCustom: "" }));
+  };
+
+  // 일요일(휴원일)은 선택 즉시 안내하고 되돌린다.
+  const handleDateChange = (value: string) => {
+    if (value && isSunday(value)) {
+      setDateError("일요일은 휴원일입니다. 다른 날짜를 선택해주세요.");
+      setFormData((prev) => ({ ...prev, preferredDate: "" }));
+      return;
+    }
+    setDateError(null);
+    setFormData((prev) => ({ ...prev, preferredDate: value }));
   };
 
   // 010-1234-5678 포맷으로 자동 하이픈
@@ -99,7 +124,7 @@ export default function ConsultForm() {
         <button
           onClick={() => {
             setSubmitted(false);
-            setFormData({ parentName: "", phone: "", grade: "", school: "", schoolCustom: "", subjects: [], preferredTime: "", memo: "" });
+            setFormData({ parentName: "", phone: "", grade: "", school: "", schoolCustom: "", preferredDate: "", preferredTime: "", memo: "", subjects: [] });
           }}
           className="text-sm text-primary hover:underline cursor-pointer"
         >
@@ -222,22 +247,46 @@ export default function ConsultForm() {
       </div>
 
       <div>
-        <label htmlFor="consult-preferred-time" className="block text-sm font-medium text-text mb-1.5">
-          상담 희망 시간대 <span className="text-text-sub font-normal">(선택)</span>
-        </label>
-        <input
-          id="consult-preferred-time"
-          type="text"
-          value={formData.preferredTime}
-          onChange={(e) => setFormData({ ...formData, preferredTime: e.target.value })}
-          className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all"
-          placeholder="예: 평일 오후 3~5시"
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-3">
+          <div>
+            <label htmlFor="consult-preferred-date" className="block text-sm font-medium text-text mb-1.5">
+              상담 희망 날짜 <span className="text-danger">*</span>
+            </label>
+            <input
+              id="consult-preferred-date"
+              type="date"
+              required
+              min={todayLocal()}
+              value={formData.preferredDate}
+              onChange={(e) => handleDateChange(e.target.value)}
+              className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 bg-white transition-all"
+            />
+          </div>
+          <div>
+            <label htmlFor="consult-preferred-time" className="block text-sm font-medium text-text mb-1.5">
+              상담 희망 시간대
+            </label>
+            <input
+              id="consult-preferred-time"
+              type="text"
+              value={formData.preferredTime}
+              onChange={(e) => setFormData({ ...formData, preferredTime: e.target.value })}
+              className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all"
+              placeholder="예: 평일 오후 3~5시"
+            />
+          </div>
+        </div>
+        {dateError && (
+          <p className="mt-1.5 text-xs text-danger">{dateError}</p>
+        )}
+        <p className="mt-1.5 text-xs text-text-hint">
+          일요일·공휴일은 휴원입니다. 당일 상담도 신청 가능합니다.
+        </p>
       </div>
 
       <div>
         <label htmlFor="consult-memo" className="block text-sm font-medium text-text mb-1.5">
-          메모 <span className="text-text-sub font-normal">(선택)</span>
+          메모
         </label>
         <textarea
           id="consult-memo"

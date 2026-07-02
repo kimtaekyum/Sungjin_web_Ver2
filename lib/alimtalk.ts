@@ -44,9 +44,19 @@ export type ConsultationAlimtalkPayload = {
   gradeDetail: string; // 예: 초등학교 2학년
   school: string | null; // 예: 강서초 (없으면 null)
   subjects: string[];
+  preferredDate: string | null; // YYYY-MM-DD (상담 희망 날짜)
   preferredTime: string | null;
   memo: string | null;
 };
+
+/** 2026-07-10 → "7월 10일(금)" */
+function formatKoreanDate(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const weekday = ["일", "월", "화", "수", "목", "금", "토"][
+    new Date(Date.UTC(y, m - 1, d)).getUTCDay()
+  ];
+  return `${m}월 ${d}일(${weekday})`;
+}
 
 /**
  * 알림톡 변수 값은 비어 있으면 카카오가 거부하므로 항상 기본값을 채운다.
@@ -59,12 +69,21 @@ function buildVariables(p: ConsultationAlimtalkPayload): Record<string, string> 
   const gradeText = p.school
     ? `${p.gradeDetail} · ${p.school}`
     : p.gradeDetail || "미입력";
+  // 승인된 템플릿의 '희망시간' 변수 하나에 날짜 + 시간대를 함께 담는다.
+  // 예: "7월 10일(금) · 평일 오후 3~5시"
+  const preferredText =
+    [
+      p.preferredDate ? formatKoreanDate(p.preferredDate) : "",
+      p.preferredTime?.trim() ?? "",
+    ]
+      .filter(Boolean)
+      .join(" · ") || "미입력";
   return {
     "#{학부모명}": p.parentName || "미입력",
     "#{연락처}": p.phoneDisplay || "미입력",
     "#{학년}": gradeText,
     "#{과목}": p.subjects.length > 0 ? p.subjects.join(", ") : "미선택",
-    "#{희망시간}": p.preferredTime?.trim() || "미입력",
+    "#{희망시간}": preferredText,
     "#{메모}": memo ? memo.slice(0, 500) : "없음",
   };
 }

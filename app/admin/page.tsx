@@ -32,6 +32,15 @@ const STATUS_STYLE: Record<ConsultationStatus, string> = {
   declined: "bg-gray-100 text-gray-600",
 };
 
+// 2026-07-10 → "2026.07.10 (금)" — 상담 희망 날짜 표시용
+function formatPreferredDate(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const weekday = ["일", "월", "화", "수", "목", "금", "토"][
+    new Date(y, m - 1, d).getDay()
+  ];
+  return `${y}.${String(m).padStart(2, "0")}.${String(d).padStart(2, "0")} (${weekday})`;
+}
+
 // 공지 본문에서 "원문 보기: <URL>" 블록을 분리/합치는 헬퍼
 // - splitSourceUrl: 저장된 content → 표시용 body와 sourceUrl 분리 (수정 진입 시 사용)
 // - mergeSourceUrl: body + sourceUrl → 저장용 content (제출 시 사용)
@@ -883,6 +892,11 @@ export default function AdminPage() {
                           {c.subjects.length > 0 && (
                             <span className="text-text-sub whitespace-nowrap">
                               과목: {c.subjects.join(", ")}
+                            </span>
+                          )}
+                          {c.preferred_date && (
+                            <span className="text-text-sub whitespace-nowrap">
+                              희망 날짜: {formatPreferredDate(c.preferred_date)}
                             </span>
                           )}
                           {c.preferred_time && (
