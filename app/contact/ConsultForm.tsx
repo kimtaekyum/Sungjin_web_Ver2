@@ -14,12 +14,6 @@ function todayLocal(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-/** YYYY-MM-DD가 일요일인지 (학원 휴원일) */
-function isSunday(dateStr: string): boolean {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  return new Date(y, m - 1, d).getDay() === 0;
-}
-
 export default function ConsultForm() {
   const [formData, setFormData] = useState({
     parentName: "",
@@ -35,7 +29,6 @@ export default function ConsultForm() {
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [dateError, setDateError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
 
@@ -53,14 +46,7 @@ export default function ConsultForm() {
     setFormData((prev) => ({ ...prev, grade, school: "", schoolCustom: "" }));
   };
 
-  // 일요일(휴원일)은 선택 즉시 안내하고 되돌린다.
   const handleDateChange = (value: string) => {
-    if (value && isSunday(value)) {
-      setDateError("일요일은 휴원일입니다. 다른 날짜를 선택해주세요.");
-      setFormData((prev) => ({ ...prev, preferredDate: "" }));
-      return;
-    }
-    setDateError(null);
     setFormData((prev) => ({ ...prev, preferredDate: value }));
   };
 
@@ -276,11 +262,8 @@ export default function ConsultForm() {
             />
           </div>
         </div>
-        {dateError && (
-          <p className="mt-1.5 text-xs text-danger">{dateError}</p>
-        )}
         <p className="mt-1.5 text-xs text-text-hint">
-          일요일·공휴일은 휴원입니다. 당일 상담도 신청 가능합니다.
+          당일 상담도 신청 가능합니다.
         </p>
       </div>
 

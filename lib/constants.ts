@@ -8,7 +8,7 @@ export const ACADEMY_INFO = {
   address: "서울 양천구 오목로 15 지우빌딩 301, 401호(상담실)",
   addressLegacy: "서울 양천구 신월동 439-17",
   registrationNo: "교육청 등록번호 제 977호",
-  operatingHours: "월~토 13:00 ~ 22:00 (일·공휴일 휴원)",
+  operatingHours: "매일 13:00 ~ 22:00",
   naverMapLink: "https://map.naver.com/p/entry/place/37941852",
   kakaoLink: "https://pf.kakao.com/_BdWxexj/chat",
   established: "30",

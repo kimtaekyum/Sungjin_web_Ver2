@@ -55,7 +55,7 @@ export default function QuickConsult() {
                   <FaIcon name="clock" className="w-5 h-5 mx-auto" />
                 </div>
                 <p className="text-xs text-text-sub mb-0.5">운영시간</p>
-                <p className="text-[13px] font-medium text-text">월~토 13:00–22:00</p>
+                <p className="text-[13px] font-medium text-text">매일 13:00–22:00</p>
               </div>
             </div>
           </div>

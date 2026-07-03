@@ -125,7 +125,7 @@ export async function POST(request: Request) {
     : [];
 
   // ----- 상담 희망 날짜 (필수) -----
-  // 당일 신청 허용, 지난 날짜·일요일(휴원일)은 거부. 서버는 UTC이므로 KST로 보정해 비교한다.
+  // 당일 신청 허용(일요일 포함), 지난 날짜는 거부. 서버는 UTC이므로 KST로 보정해 비교한다.
   const preferredDateRaw =
     typeof body.preferredDate === "string" ? body.preferredDate.trim() : "";
   if (!/^\d{4}-\d{2}-\d{2}$/.test(preferredDateRaw)) {
@@ -152,12 +152,6 @@ export async function POST(request: Request) {
   if (preferredDateRaw < todayKst) {
     return NextResponse.json(
       { error: "지난 날짜는 선택할 수 없습니다." },
-      { status: 400 }
-    );
-  }
-  if (dateUtc.getUTCDay() === 0) {
-    return NextResponse.json(
-      { error: "일요일은 휴원일입니다. 다른 날짜를 선택해주세요." },
       { status: 400 }
     );
   }
