@@ -88,26 +88,14 @@ function buildVariables(p: ConsultationAlimtalkPayload): Record<string, string> 
   };
 }
 
-/** 문자(LMS) 본문 — 알림톡과 동일한 내용을 변수 값으로 조립한다. */
-function buildSmsText(variables: Record<string, string>): string {
-  return [
-    "[성진학원] 새 상담 신청이 접수되었습니다",
-    "",
-    `▶ 학부모: ${variables["#{학부모명}"]}`,
-    `▶ 연락처: ${variables["#{연락처}"]}`,
-    `▶ 학년: ${variables["#{학년}"]}`,
-    `▶ 과목: ${variables["#{과목}"]}`,
-    `▶ 희망시간: ${variables["#{희망시간}"]}`,
-    `▶ 메모: ${variables["#{메모}"]}`,
-    "",
-    "관리자 페이지에서 확인 후 연락해 주세요.",
-  ].join("\n");
-}
-
 /**
- * 관리자 전원에게 상담 알림을 카카오 알림톡 + 문자(LMS)로 동시에 보낸다.
- * 설정이 없으면 건너뛴다. 둘 중 하나만 실패하면 나머지는 정상 발송되고,
- * 전부 실패할 때만 예외가 던져지므로 호출부에서 try/catch 할 것.
+ * 관리자 전원에게 상담 알림톡(카카오)을 보낸다. 설정이 없으면 건너뛴다.
+ * 실패 시 예외를 던지므로 호출부에서 try/catch 할 것.
+ *
+ * 문자(SMS/LMS)는 보내지 않는다. 발신번호가 통신사 "번호도용 문자차단"
+ * 서비스에 가입돼 있어 웹발송 문자가 차단되기 때문(에러 3113). 대체발송도
+ * 같은 이유로 실패하므로 꺼둔다. 문자가 필요해지면 통신사에서 해당 서비스
+ * 해지 후 알림톡+문자 동시 발송 코드(git 이력 b72cc18)를 복원하면 된다.
  */
 export async function sendConsultationAlimtalk(
   p: ConsultationAlimtalkPayload
@@ -119,29 +107,17 @@ export async function sendConsultationAlimtalk(
 
   const messageService = new SolapiMessageService(API_KEY!, API_SECRET!);
   const variables = buildVariables(p);
-  const smsText = buildSmsText(variables);
 
-  const messages = ADMIN_PHONES.flatMap((to) => [
-    // ① 카카오 알림톡. 문자를 별도로 보내므로 실패 시 대체발송(SMS)은 꺼서 중복 수신을 막는다.
-    {
-      to,
-      from: SENDER_PHONE,
-      kakaoOptions: {
-        pfId: PF_ID!,
-        templateId: TEMPLATE_ID!,
-        variables,
-        disableSms: true,
-      },
+  const messages = ADMIN_PHONES.map((to) => ({
+    to,
+    from: SENDER_PHONE,
+    kakaoOptions: {
+      pfId: PF_ID!,
+      templateId: TEMPLATE_ID!,
+      variables,
+      disableSms: true,
     },
-    // ② 문자(LMS). 발신번호가 솔라피에 등록되어 있어야 발송된다.
-    {
-      to,
-      from: SENDER_PHONE,
-      subject: "[성진학원] 새 상담 신청",
-      text: smsText,
-    },
-  ]);
+  }));
 
-  // 같은 수신자에게 알림톡+문자 두 건을 한 요청으로 보내므로 중복 발송을 허용한다.
-  await messageService.send(messages, { allowDuplicates: true });
+  await messageService.send(messages);
 }
