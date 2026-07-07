@@ -3,7 +3,6 @@
 import { useState, useMemo, useEffect } from "react";
 import FaIcon from "@/components/ui/FaIcon";
 import type { AcademyEvent } from "@/data/events";
-import { getEvents } from "@/lib/events";
 
 const RAINBOW = [
   "#E53935",
@@ -63,7 +62,12 @@ export default function EventCalendar() {
     const now = new Date();
     setToday(now);
     setCurrentDate(now);
-    getEvents().then(setAllEvents);
+    // Supabase 직접 호출 대신 같은 도메인의 API를 쓴다.
+    // 브라우저 광고차단기가 *.supabase.co 요청을 막아도 달력이 항상 보이게 하기 위함.
+    fetch("/api/events")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((events: AcademyEvent[]) => setAllEvents(events))
+      .catch(() => setAllEvents([]));
   }, []);
 
   const year = currentDate?.getFullYear() ?? 0;
