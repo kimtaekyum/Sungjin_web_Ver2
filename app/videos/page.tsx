@@ -62,34 +62,32 @@ export default function VideosPage() {
           </div>
         ) : (
           <>
-            {videos.length > 1 && (
-              <div className="flex justify-end mb-5">
-                <div
-                  className="inline-flex rounded-lg border border-border/50 bg-surface p-0.5"
-                  role="group"
-                  aria-label="영상 정렬 순서"
-                >
-                  {([
-                    { value: "newest", label: "최신순" },
-                    { value: "oldest", label: "오래된순" },
-                  ] as const).map(({ value, label }) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setSortOrder(value)}
-                      aria-pressed={sortOrder === value}
-                      className={`px-3.5 py-1.5 text-[13px] font-medium rounded-md transition-colors cursor-pointer ${
-                        sortOrder === value
-                          ? "bg-primary text-white"
-                          : "text-text-sub hover:text-primary"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
+            <div className="flex justify-end mb-5">
+              <div
+                className="inline-flex rounded-lg border border-border/50 bg-surface p-0.5"
+                role="group"
+                aria-label="영상 정렬 순서"
+              >
+                {([
+                  { value: "newest", label: "최신순" },
+                  { value: "oldest", label: "오래된순" },
+                ] as const).map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setSortOrder(value)}
+                    aria-pressed={sortOrder === value}
+                    className={`px-3.5 py-1.5 text-[13px] font-medium rounded-md transition-colors cursor-pointer ${
+                      sortOrder === value
+                        ? "bg-primary text-white"
+                        : "text-text-sub hover:text-primary"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
-            )}
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {sortedVideos.map((video) => (
