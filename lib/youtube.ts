@@ -48,8 +48,7 @@ async function getUploadsPlaylistId(apiKey: string, channelId: string): Promise<
 }
 
 /**
- * 채널의 업로드 재생목록에서 최신 영상을 가져온다. (수동 전체 동기화·백필용)
- * 실시간 반영은 웹훅(app/api/youtube-webhook)이 담당한다.
+ * 채널의 업로드 재생목록에서 최신 영상을 가져온다.
  * API 키/채널 ID가 없으면 빈 배열을 반환한다 (sync-blog의 fallback 패턴과 동일한 안전장치).
  */
 export async function fetchLatestVideos(maxResults = 10): Promise<YoutubeVideo[]> {
@@ -82,29 +81,5 @@ export async function fetchLatestVideos(maxResults = 10): Promise<YoutubeVideo[]
   } catch (err) {
     console.error("유튜브 영상 목록 로드 실패:", err);
     return [];
-  }
-}
-
-/** 영상 ID 하나로 상세 정보를 가져온다. 웹훅 알림에는 제목·ID만 오므로 설명·썸네일은 여기서 채운다. */
-export async function fetchVideoById(youtubeId: string): Promise<YoutubeVideo | null> {
-  const apiKey = process.env.YOUTUBE_API_KEY;
-  if (!apiKey) {
-    console.warn("YOUTUBE_API_KEY가 설정되지 않았습니다.");
-    return null;
-  }
-
-  try {
-    const url = `${YOUTUBE_API_BASE}/videos?part=snippet&id=${encodeURIComponent(youtubeId)}&key=${apiKey}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`영상 조회 실패: ${res.status}`);
-
-    const json = await res.json();
-    const snippet = json.items?.[0]?.snippet as Snippet | undefined;
-    if (!snippet) return null;
-
-    return toVideo(snippet, youtubeId);
-  } catch (err) {
-    console.error(`유튜브 영상(${youtubeId}) 조회 실패:`, err);
-    return null;
   }
 }

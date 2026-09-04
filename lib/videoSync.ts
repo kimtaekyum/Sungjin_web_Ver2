@@ -34,8 +34,8 @@ async function getExistingVideos(youtubeIds: string[]): Promise<Map<string, Exis
 }
 
 /**
- * 유튜브 영상을 videos 테이블에 반영한다.
- * 수동 동기화(app/api/sync-youtube)와 실시간 웹훅(app/api/youtube-webhook)이 공유한다.
+ * 유튜브 영상을 videos 테이블에 반영한다. 관리자 페이지의 "영상 동기화" 버튼이
+ * app/api/sync-youtube를 통해 호출한다.
  *
  * - 처음 보는 영상: Claude로 소개 문구를 만들어 새로 저장
  * - 이미 있는 영상: 제목·썸네일·설명만 최신으로 갱신

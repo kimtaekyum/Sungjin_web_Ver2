@@ -5,8 +5,7 @@ import { syncVideos } from "@/lib/videoSync";
 export const dynamic = "force-dynamic";
 
 /**
- * 유튜브 영상 수동 전체 동기화(백필). 평소 새 영상은 웹훅(app/api/youtube-webhook)이
- * 실시간으로 처리하고, 이 라우트는 웹훅이 놓친 영상이나 과거 영상을 채울 때 쓴다.
+ * 유튜브 영상 동기화. 관리자 페이지의 "영상 동기화" 버튼이 호출한다.
  * 인증 방식은 sync-blog와 동일하다.
  */
 async function runSync() {
