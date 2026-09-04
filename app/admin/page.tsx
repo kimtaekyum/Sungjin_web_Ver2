@@ -81,6 +81,8 @@ export default function AdminPage() {
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [faqOpen, setFaqOpen] = useState(false);
+  const [videoSyncing, setVideoSyncing] = useState(false);
+  const [videoSyncMessage, setVideoSyncMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Events state
   const [events, setEvents] = useState<AcademyEvent[]>([]);
@@ -241,6 +243,46 @@ export default function AdminPage() {
       });
     } finally {
       setSyncing(false);
+    }
+  };
+
+  /** 유튜브 채널의 새 영상을 가져와 영상 페이지에 반영 (handleSync와 동일한 흐름) */
+  const handleVideoSync = async () => {
+    setVideoSyncing(true);
+    setVideoSyncMessage(null);
+    try {
+      const res = await fetch("/api/sync-youtube", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_SYNC_SECRET }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setVideoSyncMessage({ type: "error", text: data.error || "영상 동기화 실패" });
+        return;
+      }
+
+      if (data.total === 0) {
+        setVideoSyncMessage({
+          type: "error",
+          text: "유튜브 채널에서 영상을 찾지 못했습니다. 채널에 공개된 영상이 있는지 확인해주세요.",
+        });
+        return;
+      }
+
+      const errorSuffix = data.errors?.length ? ` (오류 ${data.errors.length}건)` : "";
+      setVideoSyncMessage({
+        type: "success",
+        text: `${data.imported}개 영상 등록, ${data.skipped}개 이미 등록됨${errorSuffix}`,
+      });
+    } catch (err) {
+      setVideoSyncMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : "영상 동기화 실패",
+      });
+    } finally {
+      setVideoSyncing(false);
     }
   };
 
@@ -447,6 +489,19 @@ export default function AdminPage() {
                 </button>
               </>
             )}
+            <button
+              type="button"
+              onClick={handleVideoSync}
+              disabled={videoSyncing}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 px-3 py-1.5 text-[13px] md:text-sm font-medium text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              title="유튜브 채널의 새 영상을 AI 소개 문구와 함께 영상 페이지에 등록"
+            >
+              <FaIcon
+                name={videoSyncing ? "spinner" : "circle-play"}
+                className={`w-3.5 h-3.5 ${videoSyncing ? "animate-spin" : ""}`}
+              />
+              {videoSyncing ? "동기화 중..." : "영상 동기화"}
+            </button>
             <Link href="/" className="text-[13px] md:text-sm text-text-sub hover:text-primary transition-colors ml-auto md:ml-0">
               <span className="md:hidden">← 홈</span>
               <span className="hidden md:inline">홈으로 돌아가기</span>
@@ -522,6 +577,28 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => setSyncMessage(null)}
+                className="text-current/60 hover:text-current cursor-pointer"
+                aria-label="닫기"
+              >
+                <FaIcon name="xmark" className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {videoSyncMessage && (
+          <div className="mx-auto max-w-[1200px] px-4 md:px-6 pb-3 pt-3">
+            <div
+              className={`rounded-lg px-4 py-2.5 text-sm flex items-center justify-between gap-3 ${
+                videoSyncMessage.type === "success"
+                  ? "bg-green-50 text-green-800 border border-green-200"
+                  : "bg-red-50 text-red-800 border border-red-200"
+              }`}
+            >
+              <span>{videoSyncMessage.text}</span>
+              <button
+                type="button"
+                onClick={() => setVideoSyncMessage(null)}
                 className="text-current/60 hover:text-current cursor-pointer"
                 aria-label="닫기"
               >
