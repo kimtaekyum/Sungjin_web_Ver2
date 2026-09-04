@@ -100,10 +100,11 @@ export default function VideosPage() {
                   <div className="relative w-full aspect-video bg-black">
                     {playingId === video.id ? (
                       <iframe
-                        src={`https://www.youtube.com/embed/${video.youtube_id}?autoplay=1`}
+                        // playsinline: iOS에서 전체화면으로 튀지 않고 카드 안에서 재생되게 한다
+                        src={`https://www.youtube.com/embed/${video.youtube_id}?autoplay=1&playsinline=1&rel=0`}
                         title={video.title}
                         className="absolute inset-0 h-full w-full"
-                        allow="accelerate; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
                       />
                     ) : (
