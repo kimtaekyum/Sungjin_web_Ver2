@@ -1,10 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SectionTitle from "@/components/ui/SectionTitle";
 import FaIcon from "@/components/ui/FaIcon";
 import { VideoGridSkeleton } from "@/components/ui/Skeleton";
 import { getVideos, type Video } from "@/lib/videos";
+
+type SortOrder = "newest" | "oldest";
+
+/** 정렬 기준값. 날짜가 비었거나 깨져 있어도 정렬이 흐트러지지 않도록 0으로 떨어뜨린다. */
+function publishedTime(video: Video): number {
+  const time = new Date(video.published_at).getTime();
+  return isNaN(time) ? 0 : time;
+}
 
 function formatDate(dateStr: string) {
   if (!dateStr) return "";
@@ -21,6 +29,7 @@ export default function VideosPage() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [playingId, setPlayingId] = useState<number | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
   useEffect(() => {
     getVideos().then((data) => {
@@ -28,6 +37,11 @@ export default function VideosPage() {
       setLoading(false);
     });
   }, []);
+
+  const sortedVideos = useMemo(() => {
+    const direction = sortOrder === "newest" ? -1 : 1;
+    return [...videos].sort((a, b) => (publishedTime(a) - publishedTime(b)) * direction);
+  }, [videos, sortOrder]);
 
   return (
     <section className="py-16 md:py-24">
@@ -47,62 +61,93 @@ export default function VideosPage() {
             <p className="text-text-sub text-sm">등록된 강의 영상이 없습니다.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {videos.map((video) => (
-              <div
-                key={video.id}
-                className="rounded-xl border border-border/50 bg-surface overflow-hidden card-hover"
-              >
-                <div className="relative w-full aspect-video bg-black">
-                  {playingId === video.id ? (
-                    <iframe
-                      src={`https://www.youtube.com/embed/${video.youtube_id}?autoplay=1`}
-                      title={video.title}
-                      className="absolute inset-0 h-full w-full"
-                      allow="accelerate; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  ) : (
+          <>
+            {videos.length > 1 && (
+              <div className="flex justify-end mb-5">
+                <div
+                  className="inline-flex rounded-lg border border-border/50 bg-surface p-0.5"
+                  role="group"
+                  aria-label="영상 정렬 순서"
+                >
+                  {([
+                    { value: "newest", label: "최신순" },
+                    { value: "oldest", label: "오래된순" },
+                  ] as const).map(({ value, label }) => (
                     <button
-                      onClick={() => setPlayingId(video.id)}
-                      className="absolute inset-0 h-full w-full group cursor-pointer"
-                      aria-label={`${video.title} 재생`}
+                      key={value}
+                      type="button"
+                      onClick={() => setSortOrder(value)}
+                      aria-pressed={sortOrder === value}
+                      className={`px-3.5 py-1.5 text-[13px] font-medium rounded-md transition-colors cursor-pointer ${
+                        sortOrder === value
+                          ? "bg-primary text-white"
+                          : "text-text-sub hover:text-primary"
+                      }`}
                     >
-                      {video.thumbnail_url && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={video.thumbnail_url}
-                          alt={video.title}
-                          loading="lazy"
-                          className="h-full w-full object-cover"
-                        />
-                      )}
-                      <span className="absolute inset-0 bg-black/20 group-hover:bg-black/35 transition-colors flex items-center justify-center">
-                        <FaIcon
-                          name="circle-play"
-                          className="w-12 h-12 text-white/90 group-hover:text-white transition-colors drop-shadow"
-                        />
-                      </span>
+                      {label}
                     </button>
-                  )}
-                </div>
-
-                <div className="p-4">
-                  <h3 className="font-medium text-text text-[15px] leading-snug line-clamp-2">
-                    {video.title}
-                  </h3>
-                  {video.summary && (
-                    <p className="mt-2 text-text-sub text-sm leading-relaxed line-clamp-3">
-                      {video.summary}
-                    </p>
-                  )}
-                  <p className="mt-3 text-xs text-text-hint">
-                    {formatDate(video.published_at)}
-                  </p>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {sortedVideos.map((video) => (
+                <div
+                  key={video.id}
+                  className="rounded-xl border border-border/50 bg-surface overflow-hidden card-hover"
+                >
+                  <div className="relative w-full aspect-video bg-black">
+                    {playingId === video.id ? (
+                      <iframe
+                        src={`https://www.youtube.com/embed/${video.youtube_id}?autoplay=1`}
+                        title={video.title}
+                        className="absolute inset-0 h-full w-full"
+                        allow="accelerate; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    ) : (
+                      <button
+                        onClick={() => setPlayingId(video.id)}
+                        className="absolute inset-0 h-full w-full group cursor-pointer"
+                        aria-label={`${video.title} 재생`}
+                      >
+                        {video.thumbnail_url && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={video.thumbnail_url}
+                            alt={video.title}
+                            loading="lazy"
+                            className="h-full w-full object-cover"
+                          />
+                        )}
+                        <span className="absolute inset-0 bg-black/20 group-hover:bg-black/35 transition-colors flex items-center justify-center">
+                          <FaIcon
+                            name="circle-play"
+                            className="w-12 h-12 text-white/90 group-hover:text-white transition-colors drop-shadow"
+                          />
+                        </span>
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="p-4">
+                    <h3 className="font-medium text-text text-[15px] leading-snug line-clamp-2">
+                      {video.title}
+                    </h3>
+                    {video.summary && (
+                      <p className="mt-2 text-text-sub text-sm leading-relaxed line-clamp-3">
+                        {video.summary}
+                      </p>
+                    )}
+                    <p className="mt-3 text-xs text-text-hint">
+                      {formatDate(video.published_at)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </section>
