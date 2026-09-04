@@ -3,6 +3,10 @@
     {
       "path": "/api/sync-blog",
       "schedule": "0 15 * * *"
+    },
+    {
+      "path": "/api/youtube-subscribe",
+      "schedule": "0 17 * * *"
     }
   ]
 }

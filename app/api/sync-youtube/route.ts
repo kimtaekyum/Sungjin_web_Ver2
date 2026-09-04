@@ -1,66 +1,16 @@
 import { NextResponse } from "next/server";
 import { fetchLatestVideos } from "@/lib/youtube";
-import { summarizeVideo } from "@/lib/summarizeVideo";
-import { supabaseAdmin } from "@/lib/supabaseServer";
+import { syncVideos } from "@/lib/videoSync";
 
 export const dynamic = "force-dynamic";
 
-interface SyncResult {
-  imported: number;
-  skipped: number;
-  total: number;
-  errors: string[];
-}
-
-async function getExistingYoutubeIds(): Promise<Set<string>> {
-  const { data, error } = await supabaseAdmin.from("videos").select("youtube_id");
-  if (error) {
-    console.error("videos 조회 실패:", error);
-    return new Set();
-  }
-  return new Set((data ?? []).map((row) => row.youtube_id as string));
-}
-
-/** 동기화 핵심 로직 — POST(수동)·GET(cron) 양쪽에서 공유 (sync-blog와 동일 패턴) */
-async function runSync(): Promise<SyncResult> {
-  const videos = await fetchLatestVideos();
-  const existingIds = await getExistingYoutubeIds();
-  const newVideos = videos.filter((v) => !existingIds.has(v.youtubeId));
-
-  const errors: string[] = [];
-  let imported = 0;
-
-  for (const video of newVideos) {
-    try {
-      const summary = await summarizeVideo(video.title, video.description);
-
-      const { error } = await supabaseAdmin.from("videos").insert({
-        youtube_id: video.youtubeId,
-        title: video.title,
-        description: video.description,
-        summary,
-        thumbnail_url: video.thumbnailUrl,
-        published_at: video.publishedAt,
-      });
-
-      if (error) {
-        errors.push(`${video.title}: ${error.message}`);
-        continue;
-      }
-
-      imported += 1;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      errors.push(`${video.title}: ${msg}`);
-    }
-  }
-
-  return {
-    imported,
-    skipped: videos.length - newVideos.length,
-    total: videos.length,
-    errors,
-  };
+/**
+ * 유튜브 영상 수동 전체 동기화(백필). 평소 새 영상은 웹훅(app/api/youtube-webhook)이
+ * 실시간으로 처리하고, 이 라우트는 웹훅이 놓친 영상이나 과거 영상을 채울 때 쓴다.
+ * 인증 방식은 sync-blog와 동일하다.
+ */
+async function runSync() {
+  return syncVideos(await fetchLatestVideos());
 }
 
 /** 관리자 수동 동기화 — body.secret 인증 (sync-blog와 동일 SYNC_SECRET 재사용) */
@@ -87,7 +37,7 @@ export async function POST(request: Request) {
   return NextResponse.json(result);
 }
 
-/** Vercel Cron(또는 외부 스케줄러) 자동 동기화 — Bearer CRON_SECRET 인증 (sync-blog와 동일 CRON_SECRET 재사용) */
+/** 외부 스케줄러용 — Bearer CRON_SECRET 인증 (sync-blog와 동일 CRON_SECRET 재사용) */
 export async function GET(request: Request) {
   const expected = process.env.CRON_SECRET;
   if (!expected) {
