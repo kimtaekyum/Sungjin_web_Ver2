@@ -18,6 +18,27 @@ export function NoticeListSkeleton({ count = 5 }: { count?: number }) {
   );
 }
 
+export function VideoGridSkeleton({ count = 6 }: { count?: number }) {
+  return (
+    <div
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+      role="status"
+      aria-label="영상 목록 불러오는 중"
+    >
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="rounded-xl border border-border/50 bg-surface overflow-hidden">
+          <Skeleton className="w-full aspect-video rounded-none" />
+          <div className="p-4 space-y-2.5">
+            <Skeleton className="h-4 w-4/5" />
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-2/3" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function AdminCardListSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="space-y-3" role="status" aria-label="목록 불러오는 중">

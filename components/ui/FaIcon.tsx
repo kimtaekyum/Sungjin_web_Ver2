@@ -28,6 +28,7 @@ import {
   faCircleQuestion,
   faChevronDown,
   faRightFromBracket,
+  faCirclePlay,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
@@ -60,6 +61,7 @@ const iconMap: Record<string, IconDefinition> = {
   "circle-question": faCircleQuestion,
   "chevron-down": faChevronDown,
   "right-from-bracket": faRightFromBracket,
+  "circle-play": faCirclePlay,
 };
 
 interface FaIconProps {
