@@ -33,8 +33,8 @@ export default function VideosPage() {
     <section className="py-16 md:py-24">
       <div className="mx-auto max-w-[1200px] px-4">
         <SectionTitle
-          title="영상"
-          subtitle={<>성진학원 유튜브 채널의 <span className="text-primary">최신 영상</span>을 확인하세요</>}
+          title="공부하기"
+          subtitle={<>수업에서 배운 내용을 <span className="text-primary">강의 영상</span>으로 복습하세요</>}
         />
 
         {loading ? (
@@ -44,7 +44,7 @@ export default function VideosPage() {
             <div className="text-text-hint mb-3">
               <FaIcon name="circle-play" className="w-10 h-10 mx-auto" />
             </div>
-            <p className="text-text-sub text-sm">등록된 영상이 없습니다.</p>
+            <p className="text-text-sub text-sm">등록된 강의 영상이 없습니다.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
