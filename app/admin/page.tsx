@@ -285,7 +285,7 @@ export default function AdminPage() {
       const errorSuffix = data.errors?.length ? ` (오류 ${data.errors.length}건)` : "";
       setVideoSyncMessage({
         type: "success",
-        text: `${data.imported}개 영상 등록, ${data.skipped}개 이미 등록됨${errorSuffix}`,
+        text: `${data.imported}개 등록, ${data.updated}개 갱신, ${data.skipped}개 변경 없음${errorSuffix}`,
       });
       await loadVideos();
     } catch (err) {
