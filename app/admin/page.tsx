@@ -14,9 +14,10 @@ import {
   type Consultation,
   type ConsultationStatus,
 } from "@/lib/consultations";
+import { getVideos, deleteVideo, type Video } from "@/lib/videos";
 import type { AcademyEvent } from "@/data/events";
 
-type Tab = "notices" | "events" | "consultations";
+type Tab = "notices" | "events" | "videos" | "consultations";
 
 const STATUS_LABEL: Record<ConsultationStatus, string> = {
   new: "신규",
@@ -83,6 +84,8 @@ export default function AdminPage() {
   const [faqOpen, setFaqOpen] = useState(false);
   const [videoSyncing, setVideoSyncing] = useState(false);
   const [videoSyncMessage, setVideoSyncMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [loadingVideos, setLoadingVideos] = useState(false);
 
   // Events state
   const [events, setEvents] = useState<AcademyEvent[]>([]);
@@ -123,6 +126,13 @@ export default function AdminPage() {
     setLoadingConsultations(false);
   }, []);
 
+  const loadVideos = useCallback(async () => {
+    setLoadingVideos(true);
+    const data = await getVideos();
+    setVideos(data);
+    setLoadingVideos(false);
+  }, []);
+
   // 초기 진입: 저장된 세션 확인 + 이후 로그인/로그아웃 이벤트 구독
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -139,8 +149,9 @@ export default function AdminPage() {
       loadNotices();
       loadEvents();
       loadConsultations();
+      loadVideos();
     }
-  }, [authenticated, loadNotices, loadEvents, loadConsultations]);
+  }, [authenticated, loadNotices, loadEvents, loadConsultations, loadVideos]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -276,6 +287,7 @@ export default function AdminPage() {
         type: "success",
         text: `${data.imported}개 영상 등록, ${data.skipped}개 이미 등록됨${errorSuffix}`,
       });
+      await loadVideos();
     } catch (err) {
       setVideoSyncMessage({
         type: "error",
@@ -284,6 +296,17 @@ export default function AdminPage() {
     } finally {
       setVideoSyncing(false);
     }
+  };
+
+  const handleVideoDelete = (video: Video) => {
+    setConfirmDialog({
+      title: "강의영상을 삭제할까요?",
+      description: `${video.title}\n\n홈페이지 목록에서만 사라지고 유튜브 원본 영상은 그대로 있습니다. 다시 "영상 동기화"를 누르면 새로 등록됩니다.`,
+      onConfirm: async () => {
+        await deleteVideo(video.id);
+        await loadVideos();
+      },
+    });
   };
 
   // ===== Event handlers =====
@@ -447,12 +470,16 @@ export default function AdminPage() {
       ? notices.length
       : activeTab === "events"
       ? events.length
+      : activeTab === "videos"
+      ? videos.length
       : consultations.length;
   const currentTitle =
     activeTab === "notices"
       ? "공지사항 관리"
       : activeTab === "events"
       ? "학사일정 관리"
+      : activeTab === "videos"
+      ? "강의영상 관리"
       : "상담 신청 관리";
 
   // Admin dashboard
@@ -489,6 +516,7 @@ export default function AdminPage() {
                 </button>
               </>
             )}
+            {activeTab === "videos" && (
             <button
               type="button"
               onClick={handleVideoSync}
@@ -502,6 +530,7 @@ export default function AdminPage() {
               />
               {videoSyncing ? "동기화 중..." : "영상 동기화"}
             </button>
+            )}
             <Link href="/" className="text-[13px] md:text-sm text-text-sub hover:text-primary transition-colors ml-auto md:ml-0">
               <span className="md:hidden">← 홈</span>
               <span className="hidden md:inline">홈으로 돌아가기</span>
@@ -546,6 +575,17 @@ export default function AdminPage() {
             </button>
             <button
               type="button"
+              onClick={() => setActiveTab("videos")}
+              className={`py-4 text-sm font-medium transition-colors border-b-2 -mb-px cursor-pointer whitespace-nowrap ${
+                activeTab === "videos"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-text-sub hover:text-text"
+              }`}
+            >
+              강의영상
+            </button>
+            <button
+              type="button"
               onClick={() => setActiveTab("consultations")}
               className={`py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === "consultations"
@@ -586,7 +626,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {videoSyncMessage && (
+        {videoSyncMessage && activeTab === "videos" && (
           <div className="mx-auto max-w-[1200px] px-4 md:px-6 pb-3 pt-3">
             <div
               className={`rounded-lg px-4 py-2.5 text-sm flex items-center justify-between gap-3 ${
@@ -902,6 +942,80 @@ export default function AdminPage() {
                 </div>
               )}
             </div>
+          </div>
+        ) : activeTab === "videos" ? (
+          // ===== Videos tab =====
+          <div>
+            {loadingVideos ? (
+              <AdminCardListSkeleton count={3} />
+            ) : videos.length === 0 ? (
+              <div className="rounded-xl bg-surface border border-border/50 p-12 text-center">
+                <div className="text-text-hint mb-3">
+                  <FaIcon name="circle-play" className="w-10 h-10 mx-auto" />
+                </div>
+                <p className="text-text-sub text-sm">등록된 강의영상이 없습니다.</p>
+                <p className="text-text-hint text-xs mt-1">
+                  유튜브에 영상을 올린 뒤 위의 &quot;영상 동기화&quot; 버튼을 눌러주세요.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {videos.map((video) => (
+                  <div
+                    key={video.id}
+                    className="rounded-xl bg-surface border border-border/50 p-4 md:p-5"
+                  >
+                    <div className="flex items-start gap-4">
+                      <a
+                        href={`https://www.youtube.com/watch?v=${video.youtube_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="relative w-28 md:w-40 shrink-0 aspect-video rounded-lg overflow-hidden bg-black"
+                        title="유튜브에서 열기"
+                      >
+                        {video.thumbnail_url && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={video.thumbnail_url}
+                            alt=""
+                            loading="lazy"
+                            className="h-full w-full object-cover"
+                          />
+                        )}
+                      </a>
+
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-[15px] font-medium text-[#444444] line-clamp-2">
+                          {video.title}
+                        </h3>
+                        {video.summary && (
+                          <p className="text-xs text-text-sub mt-1.5 line-clamp-2 leading-relaxed">
+                            {video.summary}
+                          </p>
+                        )}
+                        <p className="text-xs text-text-hint mt-2">
+                          {new Date(video.published_at).toLocaleDateString("ko-KR", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => handleVideoDelete(video)}
+                        className="p-2 rounded-lg text-text-hint hover:text-danger hover:bg-[#FDF2F2] transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        aria-label="강의영상 삭제"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           // ===== Consultations tab =====
