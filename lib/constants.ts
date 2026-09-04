@@ -20,6 +20,6 @@ export const NAV_ITEMS = [
   { label: "수업 안내", href: "/programs" },
   { label: "실적 & 후기", href: "/results" },
   { label: "공지사항", href: "/notices" },
-  { label: "공부하기", href: "/videos" },
+  { label: "강의영상", href: "/videos" },
   { label: "상담 & 등록", href: "/contact" },
 ] as const;

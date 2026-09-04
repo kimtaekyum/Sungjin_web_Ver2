@@ -47,8 +47,8 @@ export default function VideosPage() {
     <section className="py-16 md:py-24">
       <div className="mx-auto max-w-[1200px] px-4">
         <SectionTitle
-          title="공부하기"
-          subtitle={<>수업에서 배운 내용을 <span className="text-primary">강의 영상</span>으로 복습하세요</>}
+          title="강의영상"
+          subtitle={<>수업에서 배운 내용을 <span className="text-primary">영상으로 복습</span>하세요</>}
         />
 
         {loading ? (
