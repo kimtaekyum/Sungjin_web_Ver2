@@ -138,9 +138,7 @@ export default function ResourceManager() {
   return <section className="max-w-4xl">
     <p className="mb-6 text-sm text-text-sub">PDF를 분류별로 등록하면 학생들이 내려받을 수 있습니다.</p>
 
-    <ResourceLibrary refreshKey={reload} busy={busy} editing={Boolean(editing)} actionMessage={listMessage} onEdit={edit} onRemove={remove} onFormNavigate={navigateToForm} />
-
-    <form ref={formRef} onSubmit={upload} className="mt-9 scroll-mt-24 rounded-2xl border border-border bg-surface p-5 md:p-7">
+    <form ref={formRef} onSubmit={upload} className="scroll-mt-24 rounded-2xl border border-border bg-surface p-5 md:p-7">
       <h2 className="mb-5 text-lg font-semibold">{editing ? "PDF 자료 수정" : "PDF 자료 등록"}</h2>
       <p className="mb-5 text-sm text-text-sub">등록할 자료의 학교·과목·연도·학기를 선택해주세요.</p>
       {editing && <p className="mb-5 break-all rounded-lg bg-bg p-3 text-sm text-text-sub">현재 파일: {editing.name}<br />파일을 선택하면 PDF가 교체됩니다. 선택하지 않으면 제목과 분류만 수정합니다.</p>}
@@ -198,5 +196,8 @@ export default function ResourceManager() {
       {message && <p role="status" className="mt-3 text-sm text-text-sub">{message}</p>}
     </form>
 
+    <div className="mt-9">
+      <ResourceLibrary refreshKey={reload} busy={busy} editing={Boolean(editing)} actionMessage={listMessage} onEdit={edit} onRemove={remove} onFormNavigate={navigateToForm} />
+    </div>
   </section>;
 }
