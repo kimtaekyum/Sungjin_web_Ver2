@@ -120,12 +120,25 @@ export default function AdminPage() {
     setLoadingEvents(false);
   }, []);
 
-  const loadConsultations = useCallback(async () => {
-    setLoadingConsultations(true);
+  const loadConsultations = useCallback(async (background = false) => {
+    if (!background) setLoadingConsultations(true);
     const data = await getConsultations();
     setConsultations(data);
-    setLoadingConsultations(false);
+    if (!background) setLoadingConsultations(false);
   }, []);
+
+  useEffect(() => {
+    if (authenticated !== true) return;
+    const refresh = () => {
+      if (document.visibilityState === "visible") void loadConsultations(true);
+    };
+    const interval = window.setInterval(refresh, 5 * 60 * 1000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [authenticated, loadConsultations]);
 
   const loadVideos = useCallback(async () => {
     setLoadingVideos(true);
@@ -1037,6 +1050,7 @@ export default function AdminPage() {
         ) : (
           // ===== Consultations tab =====
           <div>
+            <p className="mb-5 text-sm text-text-sub">신규 신청은 접수 후 7일이 지나면 자동으로 연락 완료 처리됩니다.</p>
             {loadingConsultations ? (
               <AdminCardListSkeleton count={3} />
             ) : consultations.length === 0 ? (

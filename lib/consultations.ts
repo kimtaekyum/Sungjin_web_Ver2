@@ -28,6 +28,19 @@ export interface Consultation {
  */
 
 export async function getConsultations(): Promise<Consultation[]> {
+  // 정리 실패 시에도 목록을 표시하되, 실패를 숨기고 성공으로 간주하지 않는다.
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (sessionData.session) {
+      const response = await fetch("/api/consultations/auto-complete", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
+      });
+      if (!response.ok) console.error("상담 신청 자동 처리 실패:", response.status);
+    }
+  } catch (error) {
+    console.error("상담 신청 자동 처리 요청 실패:", error);
+  }
   const { data, error } = await supabase
     .from("consultations")
     .select("*")
