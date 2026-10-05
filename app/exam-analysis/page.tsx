@@ -102,21 +102,6 @@ export default function ExamAnalysisPage() {
                 ))}
               </div>
             </div>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <label htmlFor="resource-year" className="mb-2 block text-sm font-semibold text-text">연도</label>
-                <select id="resource-year" value={year} onChange={(e) => { setYear(e.target.value); filterChanged(); }} className={fieldClass}>
-                  <option value="">전체 연도</option>
-                  {years.map((value) => <option key={value} value={value}>{value}년</option>)}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="resource-semester" className="mb-2 block text-sm font-semibold text-text">학기</label>
-                <select id="resource-semester" value={semester} onChange={(e) => { setSemester(e.target.value); filterChanged(); }} className={fieldClass}>
-                  <option value="">전체 학기</option><option value="1">1학기</option><option value="2">2학기</option>
-                </select>
-              </div>
-            </div>
             <div>
               <p id="resource-subject-label" className="mb-2 text-sm font-semibold text-text">과목</p>
               <div role="group" aria-labelledby="resource-subject-label" className="flex flex-wrap gap-2">
@@ -127,7 +112,13 @@ export default function ExamAnalysisPage() {
                 ))}
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <label htmlFor="resource-year" className="text-sm font-semibold text-text">연도
+                <select id="resource-year" value={year} onChange={(e) => { setYear(e.target.value); filterChanged(); }} className={`mt-2 ${fieldClass}`}>
+                  <option value="">전체 연도</option>
+                  {years.map((value) => <option key={value} value={value}>{value}년</option>)}
+                </select>
+              </label>
               <label htmlFor="filter-school" className="text-sm font-semibold text-text">학교명
                 <select id="filter-school" value={schoolName} onChange={(e) => { setSchoolName(e.target.value); filterChanged(); }} className={`mt-2 ${fieldClass}`}>
                   <option value="">전체 학교명</option>{schoolOptions.map((name) => <option key={name} value={name}>{name}</option>)}
@@ -136,6 +127,11 @@ export default function ExamAnalysisPage() {
               <label htmlFor="filter-grade" className="text-sm font-semibold text-text">학년
                 <select id="filter-grade" value={grade} onChange={(e) => { setGrade(e.target.value); filterChanged(); }} className={`mt-2 ${fieldClass}`}>
                   <option value="">전체 학년</option>{["1", "2", "3"].map((value) => <option key={value} value={value}>{value}학년</option>)}
+                </select>
+              </label>
+              <label htmlFor="resource-semester" className="text-sm font-semibold text-text">학기
+                <select id="resource-semester" value={semester} onChange={(e) => { setSemester(e.target.value); filterChanged(); }} className={`mt-2 ${fieldClass}`}>
+                  <option value="">전체 학기</option><option value="1">1학기</option><option value="2">2학기</option>
                 </select>
               </label>
               <label htmlFor="filter-exam" className="text-sm font-semibold text-text">시험 구분
