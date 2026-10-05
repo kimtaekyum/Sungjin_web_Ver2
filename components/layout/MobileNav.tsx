@@ -93,8 +93,8 @@ export default function MobileNav({ open, onClose }: MobileNavProps) {
           <Image
             src="/images/logo@2x.png"
             alt={ACADEMY_INFO.name}
-            width={120}
-            height={28}
+            width={800}
+            height={185}
             className="h-7 w-auto"
           />
           <button onClick={onClose} className="p-2 cursor-pointer rounded-full hover:bg-bg transition-colors" aria-label="메뉴 닫기">

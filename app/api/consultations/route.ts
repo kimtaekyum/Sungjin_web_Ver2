@@ -50,7 +50,7 @@ async function countRecentByPhone(
     .gte("created_at", since);
   if (error) {
     console.error("rate-limit 조회 실패:", error);
-    return 0;
+    throw new Error("신청 횟수를 확인하지 못했습니다.");
   }
   return count ?? 0;
 }
@@ -58,7 +58,9 @@ async function countRecentByPhone(
 export async function POST(request: Request) {
   let body: Body;
   try {
-    body = (await request.json()) as Body;
+    const input: unknown = await request.json();
+    if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Invalid body");
+    body = input as Body;
   } catch {
     return NextResponse.json({ error: "잘못된 요청 형식입니다." }, { status: 400 });
   }
@@ -70,14 +72,20 @@ export async function POST(request: Request) {
     if (!token) {
       return NextResponse.json({ error: "보안 인증을 완료해주세요." }, { status: 400 });
     }
-    const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `secret=${encodeURIComponent(turnstileSecret)}&response=${encodeURIComponent(token)}`,
-    });
-    const verifyData = await verifyRes.json() as { success: boolean };
-    if (!verifyData.success) {
-      return NextResponse.json({ error: "보안 인증에 실패했습니다. 다시 시도해주세요." }, { status: 403 });
+    try {
+      const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `secret=${encodeURIComponent(turnstileSecret)}&response=${encodeURIComponent(token)}`,
+      });
+      if (!verifyRes.ok) throw new Error("Verification service unavailable");
+      const verifyData = await verifyRes.json() as { success?: boolean } | null;
+      if (!verifyData || verifyData.success !== true) {
+        return NextResponse.json({ error: "보안 인증에 실패했습니다. 다시 시도해주세요." }, { status: 403 });
+      }
+    } catch (error) {
+      console.error("보안 인증 서비스 확인 실패:", error);
+      return NextResponse.json({ error: "보안 인증을 확인하지 못했습니다. 잠시 후 다시 시도해주세요." }, { status: 503 });
     }
   }
 
@@ -165,7 +173,13 @@ export async function POST(request: Request) {
   const memo = memoRaw.slice(0, 1000) || null;
 
   // ----- 2. Rate limit (전화번호 기준) -----
-  const recentCount = await countRecentByPhone(normalizedPhone, RATE_LIMIT_WINDOW_SEC);
+  let recentCount: number;
+  try {
+    recentCount = await countRecentByPhone(normalizedPhone, RATE_LIMIT_WINDOW_SEC);
+  } catch (error) {
+    console.error("상담 신청 사전 확인 실패:", error);
+    return NextResponse.json({ error: "신청 정보를 확인하지 못했습니다. 잠시 후 다시 시도해주세요." }, { status: 503 });
+  }
   if (recentCount >= RATE_LIMIT_MAX) {
     return NextResponse.json(
       {

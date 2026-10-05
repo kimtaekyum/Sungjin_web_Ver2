@@ -56,6 +56,7 @@ export default function EventCalendar() {
   const [today, setToday] = useState<Date | null>(null);
   const [currentDate, setCurrentDate] = useState<Date | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [allEvents, setAllEvents] = useState<AcademyEvent[]>([]);
 
   useEffect(() => {
@@ -67,9 +68,9 @@ export default function EventCalendar() {
     // Supabase 직접 호출 대신 같은 도메인의 API를 쓴다.
     // 브라우저 광고차단기가 *.supabase.co 요청을 막아도 달력이 항상 보이게 하기 위함.
     fetch("/api/events")
-      .then((res) => (res.ok ? res.json() : []))
+      .then((res) => { if (!res.ok) throw new Error("일정 조회 실패"); return res.json(); })
       .then((events: AcademyEvent[]) => setAllEvents(events))
-      .catch(() => setAllEvents([]));
+      .catch(() => setLoadError(true));
     return () => cancelAnimationFrame(frame);
   }, []);
 
@@ -92,13 +93,14 @@ export default function EventCalendar() {
   const ddayText = useMemo(() => {
     if (!today) return "";
     let csat = getCsatDate(today.getFullYear());
-    if (csat < today) csat = getCsatDate(today.getFullYear() + 1);
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    if (csat < todayMidnight) csat = getCsatDate(today.getFullYear() + 1);
     const diff = Math.ceil(
       (csat.getTime() - new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()) /
         86400000
     );
     const csatYear = csat.getFullYear();
-    if (diff === 0) return `${csatYear}학년도 수능 D-Day!`;
+    if (diff === 0) return `${csatYear + 1}학년도 수능 D-Day!`;
     return `${csatYear + 1}학년도 수능 D-${diff}`;
   }, [today]);
 
@@ -195,7 +197,8 @@ export default function EventCalendar() {
   }
 
   return (
-    <div className="rounded-xl bg-surface border border-border/50 p-6 md:p-7 h-full flex flex-col">
+    <div className="min-w-0 rounded-xl bg-surface border border-border/50 p-6 md:p-7 h-full flex flex-col">
+      {loadError && <p role="status" className="mb-3 text-xs text-danger">학원 일정을 불러오지 못했습니다. 잠시 후 새로고침해주세요.</p>}
       <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-[#FDF2F2] flex items-center justify-center text-primary">

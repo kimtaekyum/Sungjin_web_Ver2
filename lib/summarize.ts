@@ -50,7 +50,7 @@ ${originalContent}`;
     throw new Error(`Claude 응답 JSON 파싱 실패: ${text.slice(0, 200)}`);
   }
 
-  if (!parsed.title || !parsed.content) {
+  if (!parsed || typeof parsed.title !== "string" || typeof parsed.content !== "string" || !parsed.title.trim() || !parsed.content.trim()) {
     throw new Error("Claude 응답에 title 또는 content 필드가 없습니다.");
   }
 

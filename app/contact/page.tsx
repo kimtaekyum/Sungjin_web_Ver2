@@ -9,7 +9,7 @@ import { FaqJsonLd } from "@/components/seo/JsonLd";
 import ConsultForm from "./ConsultForm";
 
 export const metadata: Metadata = {
-  title: "상담 & 등록 | 성진학원 - 무료 상담 신청",
+  title: "상담 & 등록 | 무료 상담 신청",
   description:
     "성진학원 온라인 상담 신청. 초4~고3 국영수 입시 전문. 전화, 카카오톡, 온라인 폼으로 편하게 문의하세요.",
   alternates: { canonical: "/contact" },

@@ -73,8 +73,8 @@ export default function Header() {
           <Image
             src="/images/logo@2x.png"
             alt={ACADEMY_INFO.name}
-            width={160}
-            height={37}
+            width={800}
+            height={185}
             className="h-8 w-auto md:h-9 transition-all duration-300"
             priority
           />

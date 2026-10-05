@@ -103,7 +103,7 @@ export default function StrengthCards() {
   const visibleId = activeId ?? scrollActiveId;
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-16 md:py-24 overflow-x-clip">
       <div className="mx-auto max-w-[1200px] px-4 md:px-6">
         <SectionTitle
           title={<>성진학원 <span className="text-primary">6가지 강점</span></>}

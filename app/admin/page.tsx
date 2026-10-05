@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import FaIcon from "@/components/ui/FaIcon";
 import { AdminCardListSkeleton } from "@/components/ui/Skeleton";
@@ -77,6 +77,8 @@ export default function AdminPage() {
   // Notices state
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [adminError, setAdminError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState({ title: "", content: "", pinned: false, sourceUrl: "" });
   const [urlError, setUrlError] = useState<string | null>(null);
@@ -97,6 +99,7 @@ export default function AdminPage() {
   // Consultations state
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loadingConsultations, setLoadingConsultations] = useState(false);
+  const [changingStatusId, setChangingStatusId] = useState<number | null>(null);
   const [consultationSearch, setConsultationSearch] = useState("");
   const [consultationStatus, setConsultationStatus] = useState<ConsultationStatus | "all">("all");
 
@@ -107,26 +110,70 @@ export default function AdminPage() {
     onConfirm: () => Promise<void> | void;
   } | null>(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogOpen = Boolean(confirmDialog || faqOpen);
+
+  useEffect(() => {
+    if (!dialogOpen) return;
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialogRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      if (previousFocus instanceof HTMLElement && previousFocus.getClientRects().length) previousFocus.focus();
+    };
+  }, [dialogOpen]);
+
+  const handleDialogKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Escape" && !confirmBusy) {
+      event.preventDefault();
+      setConfirmDialog(null);
+      setFaqOpen(false);
+    }
+    if (event.key !== "Tab") return;
+    const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>("button:not(:disabled), a[href]")]
+      .filter((element) => element.getClientRects().length > 0);
+    const first = buttons[0], last = buttons[buttons.length - 1];
+    if (!first) { event.preventDefault(); return; }
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  };
 
   const loadNotices = useCallback(async () => {
     setLoading(true);
-    const data = await getNotices();
-    setNotices(data);
-    setLoading(false);
+    try {
+      const data = await getNotices();
+      setNotices(data);
+    } catch (error) {
+      setAdminError(error instanceof Error ? error.message : "목록 조회에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const loadEvents = useCallback(async () => {
     setLoadingEvents(true);
-    const data = await getEvents();
-    setEvents(data);
-    setLoadingEvents(false);
+    try {
+      const data = await getEvents();
+      setEvents(data);
+    } catch (error) {
+      setAdminError(error instanceof Error ? error.message : "목록 조회에 실패했습니다.");
+    } finally {
+      setLoadingEvents(false);
+    }
   }, []);
 
   const loadConsultations = useCallback(async (background = false) => {
     if (!background) setLoadingConsultations(true);
-    const data = await getConsultations();
-    setConsultations(data);
-    if (!background) setLoadingConsultations(false);
+    try {
+      const data = await getConsultations();
+      setConsultations(data);
+    } catch (error) {
+      setAdminError(error instanceof Error ? error.message : "상담 목록 조회에 실패했습니다.");
+    } finally {
+      if (!background) setLoadingConsultations(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -144,9 +191,14 @@ export default function AdminPage() {
 
   const loadVideos = useCallback(async () => {
     setLoadingVideos(true);
-    const data = await getVideos();
-    setVideos(data);
-    setLoadingVideos(false);
+    try {
+      const data = await getVideos();
+      setVideos(data);
+    } catch (error) {
+      setAdminError(error instanceof Error ? error.message : "목록 조회에 실패했습니다.");
+    } finally {
+      setLoadingVideos(false);
+    }
   }, []);
 
   // 초기 진입: 저장된 세션 확인 + 이후 로그인/로그아웃 이벤트 구독
@@ -192,7 +244,7 @@ export default function AdminPage() {
   // ===== Notice handlers =====
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title.trim()) return;
+    if (saving || !form.title.trim()) return;
 
     // URL 검증: 비어있으면 OK, 있으면 http(s)://로 시작해야 함
     const url = form.sourceUrl.trim();
@@ -208,14 +260,19 @@ export default function AdminPage() {
       pinned: form.pinned,
     };
 
-    if (editingId) {
-      await updateNotice(editingId, payload);
-    } else {
-      await addNotice(payload);
+    setSaving(true);
+    setAdminError(null);
+    try {
+      const saved = editingId ? await updateNotice(editingId, payload) : await addNotice(payload);
+      if (!saved) throw new Error("공지사항을 저장하지 못했습니다. 입력 내용을 확인하고 다시 시도해주세요.");
+      setForm({ title: "", content: "", pinned: false, sourceUrl: "" });
+      setEditingId(null);
+      await loadNotices();
+    } catch (error) {
+      setAdminError(error instanceof Error ? error.message : "공지사항 저장에 실패했습니다.");
+    } finally {
+      setSaving(false);
     }
-    await loadNotices();
-    setForm({ title: "", content: "", pinned: false, sourceUrl: "" });
-    setEditingId(null);
   };
 
   const handleEdit = (notice: Notice) => {
@@ -226,11 +283,12 @@ export default function AdminPage() {
   };
 
   const handleDelete = (id: number, title: string) => {
+    setAdminError(null);
     setConfirmDialog({
       title: "공지사항을 삭제할까요?",
       description: title,
       onConfirm: async () => {
-        await deleteNotice(id);
+        if (!(await deleteNotice(id))) throw new Error("공지사항을 삭제하지 못했습니다. 다시 시도해주세요.");
         await loadNotices();
       },
     });
@@ -246,10 +304,12 @@ export default function AdminPage() {
     setSyncing(true);
     setSyncMessage(null);
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
       const res = await fetch("/api/sync-blog", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_SYNC_SECRET }),
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
 
@@ -260,7 +320,7 @@ export default function AdminPage() {
 
       const errorSuffix = data.errors?.length ? ` (오류 ${data.errors.length}건)` : "";
       setSyncMessage({
-        type: "success",
+        type: data.errors?.length ? "error" : "success",
         text: `${data.imported}개 공지사항 생성, ${data.skipped}개 이미 처리됨${errorSuffix}`,
       });
       await loadNotices();
@@ -279,10 +339,12 @@ export default function AdminPage() {
     setVideoSyncing(true);
     setVideoSyncMessage(null);
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
       const res = await fetch("/api/sync-youtube", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ secret: process.env.NEXT_PUBLIC_SYNC_SECRET }),
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
 
@@ -301,7 +363,7 @@ export default function AdminPage() {
 
       const errorSuffix = data.errors?.length ? ` (오류 ${data.errors.length}건)` : "";
       setVideoSyncMessage({
-        type: "success",
+        type: data.errors?.length ? "error" : "success",
         text: `${data.imported}개 등록, ${data.updated}개 갱신, ${data.skipped}개 변경 없음${errorSuffix}`,
       });
       await loadVideos();
@@ -316,11 +378,12 @@ export default function AdminPage() {
   };
 
   const handleVideoDelete = (video: Video) => {
+    setAdminError(null);
     setConfirmDialog({
       title: "강의영상을 삭제할까요?",
       description: `${video.title}\n\n홈페이지 목록에서만 사라지고 유튜브 원본 영상은 그대로 있습니다. 다시 "영상 동기화"를 누르면 새로 등록됩니다.`,
       onConfirm: async () => {
-        await deleteVideo(video.id);
+        if (!(await deleteVideo(video.id))) throw new Error("영상을 삭제하지 못했습니다. 다시 시도해주세요.");
         await loadVideos();
       },
     });
@@ -329,29 +392,28 @@ export default function AdminPage() {
   // ===== Event handlers =====
   const handleEventSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!eventForm.title.trim() || !eventForm.startDate) return;
+    if (saving || !eventForm.title.trim() || !eventForm.startDate) return;
 
     if (eventForm.endDate && eventForm.endDate < eventForm.startDate) {
       alert("종료일은 시작일보다 빠를 수 없습니다.");
       return;
     }
 
-    if (editingEventId) {
-      await updateEvent(editingEventId, {
-        title: eventForm.title,
-        startDate: eventForm.startDate,
-        endDate: eventForm.endDate || null,
-      });
-    } else {
-      await addEvent({
-        title: eventForm.title,
-        startDate: eventForm.startDate,
-        endDate: eventForm.endDate || undefined,
-      });
+    setSaving(true);
+    setAdminError(null);
+    try {
+      const saved = editingEventId
+        ? await updateEvent(editingEventId, { title: eventForm.title, startDate: eventForm.startDate, endDate: eventForm.endDate || null })
+        : await addEvent({ title: eventForm.title, startDate: eventForm.startDate, endDate: eventForm.endDate || undefined });
+      if (!saved) throw new Error("일정을 저장하지 못했습니다. 입력 내용을 확인하고 다시 시도해주세요.");
+      setEventForm({ title: "", startDate: "", endDate: "" });
+      setEditingEventId(null);
+      await loadEvents();
+    } catch (error) {
+      setAdminError(error instanceof Error ? error.message : "일정 저장에 실패했습니다.");
+    } finally {
+      setSaving(false);
     }
-    await loadEvents();
-    setEventForm({ title: "", startDate: "", endDate: "" });
-    setEditingEventId(null);
   };
 
   const handleEventEdit = (ev: AcademyEvent) => {
@@ -364,11 +426,12 @@ export default function AdminPage() {
   };
 
   const handleEventDelete = (id: string, title: string) => {
+    setAdminError(null);
     setConfirmDialog({
       title: "일정을 삭제할까요?",
       description: title,
       onConfirm: async () => {
-        await deleteEvent(id);
+        if (!(await deleteEvent(id))) throw new Error("일정을 삭제하지 못했습니다. 다시 시도해주세요.");
         await loadEvents();
       },
     });
@@ -381,16 +444,26 @@ export default function AdminPage() {
 
   // ===== Consultation handlers =====
   const handleConsultationStatus = async (id: number, status: ConsultationStatus) => {
-    await updateConsultationStatus(id, status);
-    await loadConsultations();
+    if (changingStatusId !== null) return;
+    setChangingStatusId(id);
+    setAdminError(null);
+    try {
+      if (!(await updateConsultationStatus(id, status))) throw new Error("상담 상태를 변경하지 못했습니다. 다시 시도해주세요.");
+      await loadConsultations();
+    } catch (error) {
+      setAdminError(error instanceof Error ? error.message : "상담 상태 변경에 실패했습니다.");
+    } finally {
+      setChangingStatusId(null);
+    }
   };
 
   const handleConsultationDelete = (id: number, name: string) => {
+    setAdminError(null);
     setConfirmDialog({
       title: "상담 신청을 삭제할까요?",
       description: `${name}님 상담`,
       onConfirm: async () => {
-        await deleteConsultation(id);
+        if (!(await deleteConsultation(id))) throw new Error("상담을 삭제하지 못했습니다. 다시 시도해주세요.");
         await loadConsultations();
       },
     });
@@ -579,7 +652,7 @@ export default function AdminPage() {
             <div className="flex gap-6 overflow-x-auto">
             <button
               type="button"
-              onClick={() => setActiveTab("notices")}
+              disabled={saving} onClick={() => { setAdminError(null); setActiveTab("notices"); }}
               className={`py-4 text-sm font-medium transition-colors border-b-2 -mb-px cursor-pointer whitespace-nowrap ${
                 activeTab === "notices"
                   ? "border-primary text-primary"
@@ -590,7 +663,7 @@ export default function AdminPage() {
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab("events")}
+              disabled={saving} onClick={() => { setAdminError(null); setActiveTab("events"); }}
               className={`py-4 text-sm font-medium transition-colors border-b-2 -mb-px cursor-pointer whitespace-nowrap ${
                 activeTab === "events"
                   ? "border-primary text-primary"
@@ -601,7 +674,7 @@ export default function AdminPage() {
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab("videos")}
+              disabled={saving} onClick={() => { setAdminError(null); setActiveTab("videos"); }}
               className={`py-4 text-sm font-medium transition-colors border-b-2 -mb-px cursor-pointer whitespace-nowrap ${
                 activeTab === "videos"
                   ? "border-primary text-primary"
@@ -612,7 +685,7 @@ export default function AdminPage() {
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab("resources")}
+              disabled={saving} onClick={() => { setAdminError(null); setActiveTab("resources"); }}
               className={`py-4 text-sm font-medium transition-colors border-b-2 -mb-px cursor-pointer whitespace-nowrap ${
                 activeTab === "resources"
                   ? "border-primary text-primary"
@@ -623,7 +696,7 @@ export default function AdminPage() {
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab("consultations")}
+              disabled={saving} onClick={() => { setAdminError(null); setActiveTab("consultations"); }}
               className={`py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === "consultations"
                   ? "border-primary text-primary"
@@ -687,6 +760,7 @@ export default function AdminPage() {
       </div>
 
       <div className="mx-auto max-w-[1200px] px-4 md:px-6 py-10 md:py-12">
+        {adminError && <div role="alert" className="mb-5 rounded-lg border border-danger/20 bg-red-50 px-4 py-3 text-sm text-danger">{adminError}</div>}
         {activeTab === "resources" ? (
           <ResourceManager />
         ) : activeTab === "notices" ? (
@@ -698,6 +772,7 @@ export default function AdminPage() {
                   {editingId ? "공지사항 수정" : "새 공지사항"}
                 </h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  <fieldset disabled={saving} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-text mb-1.5">제목 *</label>
                     <input
@@ -757,13 +832,15 @@ export default function AdminPage() {
                   <div className="flex gap-2">
                     <button
                       type="submit"
-                      className="flex-1 rounded-lg bg-primary text-white py-2.5 text-sm font-medium hover:bg-[#8A1519] transition-colors cursor-pointer"
+                      disabled={saving}
+                      className="disabled:opacity-60 disabled:cursor-not-allowed flex-1 rounded-lg bg-primary text-white py-2.5 text-sm font-medium hover:bg-[#8A1519] transition-colors cursor-pointer"
                     >
-                      {editingId ? "수정 완료" : "등록"}
+                      {saving ? "저장 중..." : editingId ? "수정 완료" : "등록"}
                     </button>
                     {editingId && (
                       <button
                         type="button"
+                        disabled={saving}
                         onClick={handleCancel}
                         className="rounded-lg border border-border px-4 py-2.5 text-sm text-text-sub hover:bg-bg transition-colors cursor-pointer"
                       >
@@ -771,6 +848,7 @@ export default function AdminPage() {
                       </button>
                     )}
                   </div>
+                  </fieldset>
                 </form>
               </div>
             </div>
@@ -814,14 +892,14 @@ export default function AdminPage() {
                           <div className="mt-2 flex items-center gap-2">
                             <div className="md:hidden flex gap-1">
                               <button
-                                onClick={() => handleEdit(notice)}
+                                disabled={saving} onClick={() => handleEdit(notice)}
                                 className="p-2 rounded-lg text-text-hint hover:text-primary hover:bg-bg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 aria-label="공지사항 수정"
                               >
                                 <FaIcon name="pencil" className="w-3.5 h-3.5" />
                               </button>
                               <button
-                                onClick={() => handleDelete(notice.id, notice.title)}
+                                disabled={saving} onClick={() => handleDelete(notice.id, notice.title)}
                                 className="p-2 rounded-lg text-text-hint hover:text-danger hover:bg-[#FDF2F2] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 aria-label="공지사항 삭제"
                               >
@@ -841,14 +919,14 @@ export default function AdminPage() {
                         </div>
                         <div className="hidden md:flex gap-1 shrink-0">
                           <button
-                            onClick={() => handleEdit(notice)}
+                            disabled={saving} onClick={() => handleEdit(notice)}
                             className="p-2 rounded-lg text-text-hint hover:text-primary hover:bg-bg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                             aria-label="공지사항 수정"
                           >
                             <FaIcon name="pencil" className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => handleDelete(notice.id, notice.title)}
+                            disabled={saving} onClick={() => handleDelete(notice.id, notice.title)}
                             className="p-2 rounded-lg text-text-hint hover:text-danger hover:bg-[#FDF2F2] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                             aria-label="공지사항 삭제"
                           >
@@ -873,6 +951,7 @@ export default function AdminPage() {
                   {editingEventId ? "일정 수정" : "새 일정 등록"}
                 </h2>
                 <form onSubmit={handleEventSubmit} className="space-y-4">
+                  <fieldset disabled={saving} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-text mb-1.5">일정 제목 *</label>
                     <input
@@ -909,13 +988,15 @@ export default function AdminPage() {
                   <div className="flex gap-2">
                     <button
                       type="submit"
-                      className="flex-1 rounded-lg bg-primary text-white py-2.5 text-sm font-medium hover:bg-[#8A1519] transition-colors cursor-pointer"
+                      disabled={saving}
+                      className="disabled:opacity-60 disabled:cursor-not-allowed flex-1 rounded-lg bg-primary text-white py-2.5 text-sm font-medium hover:bg-[#8A1519] transition-colors cursor-pointer"
                     >
-                      {editingEventId ? "수정 완료" : "등록"}
+                      {saving ? "저장 중..." : editingEventId ? "수정 완료" : "등록"}
                     </button>
                     {editingEventId && (
                       <button
                         type="button"
+                        disabled={saving}
                         onClick={handleEventCancel}
                         className="rounded-lg border border-border px-4 py-2.5 text-sm text-text-sub hover:bg-bg transition-colors cursor-pointer"
                       >
@@ -923,6 +1004,7 @@ export default function AdminPage() {
                       </button>
                     )}
                   </div>
+                  </fieldset>
                 </form>
               </div>
             </div>
@@ -959,14 +1041,14 @@ export default function AdminPage() {
                         </div>
                         <div className="flex gap-1 shrink-0">
                           <button
-                            onClick={() => handleEventEdit(ev)}
+                            disabled={saving} onClick={() => handleEventEdit(ev)}
                             className="p-2 rounded-lg text-text-hint hover:text-primary hover:bg-bg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                             aria-label="일정 수정"
                           >
                             <FaIcon name="pencil" className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => handleEventDelete(ev.id, ev.title)}
+                            disabled={saving} onClick={() => handleEventDelete(ev.id, ev.title)}
                             className="p-2 rounded-lg text-text-hint hover:text-danger hover:bg-[#FDF2F2] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                             aria-label="일정 삭제"
                           >
@@ -1166,6 +1248,7 @@ export default function AdminPage() {
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <select
+                          disabled={changingStatusId !== null}
                           value={c.status}
                           onChange={(e) =>
                             handleConsultationStatus(c.id, e.target.value as ConsultationStatus)
@@ -1206,6 +1289,12 @@ export default function AdminPage() {
           }}
         >
           <div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-title"
+            tabIndex={-1}
+            onKeyDown={handleDialogKeyDown}
             className="bg-surface rounded-xl w-full max-w-sm p-6"
             onClick={(e) => e.stopPropagation()}
           >
@@ -1216,11 +1305,12 @@ export default function AdminPage() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-medium text-[#444444]">{confirmDialog.title}</h3>
+                <h3 id="confirm-title" className="text-base font-medium text-[#444444]">{confirmDialog.title}</h3>
                 {confirmDialog.description && (
                   <p className="mt-1 text-sm text-text-sub truncate">{confirmDialog.description}</p>
                 )}
                 <p className="mt-2 text-xs text-text-hint">삭제하면 복구할 수 없습니다.</p>
+                {adminError && <p role="alert" className="mt-2 text-sm text-danger">{adminError}</p>}
               </div>
             </div>
             <div className="flex gap-2">
@@ -1237,11 +1327,15 @@ export default function AdminPage() {
                 onClick={async () => {
                   if (!confirmDialog) return;
                   setConfirmBusy(true);
+                  dialogRef.current?.focus();
                   try {
+                    setAdminError(null);
                     await confirmDialog.onConfirm();
+                    setConfirmDialog(null);
+                  } catch (error) {
+                    setAdminError(error instanceof Error ? error.message : "삭제에 실패했습니다.");
                   } finally {
                     setConfirmBusy(false);
-                    setConfirmDialog(null);
                   }
                 }}
                 disabled={confirmBusy}
@@ -1268,6 +1362,12 @@ export default function AdminPage() {
           onClick={() => setFaqOpen(false)}
         >
           <div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="관리자 도움말"
+            tabIndex={-1}
+            onKeyDown={handleDialogKeyDown}
             className="bg-surface rounded-xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >

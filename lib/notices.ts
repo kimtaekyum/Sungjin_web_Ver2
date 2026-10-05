@@ -17,7 +17,7 @@ export async function getNotices(): Promise<Notice[]> {
 
   if (error) {
     console.error("공지사항 로드 실패:", error);
-    return [];
+    throw new Error("공지사항 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
   }
   return data ?? [];
 }

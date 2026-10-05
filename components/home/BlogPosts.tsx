@@ -13,7 +13,7 @@ export default async function BlogPosts() {
   const posts = await fetchLatestBlogPosts();
 
   return (
-    <div className="rounded-xl bg-surface border border-border/50 p-6 md:p-7 h-full flex flex-col">
+    <div className="min-w-0 rounded-xl bg-surface border border-border/50 p-6 md:p-7 h-full flex flex-col">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-[#FDF2F2] flex items-center justify-center text-primary">

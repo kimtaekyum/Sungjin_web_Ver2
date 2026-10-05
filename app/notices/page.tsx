@@ -9,13 +9,13 @@ import { getNotices, type Notice } from "@/lib/notices";
 export default function NoticesPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   useEffect(() => {
-    getNotices().then((data) => {
-      setNotices(data);
-      setLoading(false);
-    });
+    getNotices().then(setNotices)
+      .catch((error: unknown) => setLoadError(error instanceof Error ? error.message : "목록을 불러오지 못했습니다."))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -28,6 +28,11 @@ export default function NoticesPage() {
 
         {loading ? (
           <NoticeListSkeleton count={5} />
+        ) : loadError ? (
+          <div role="alert" className="mx-auto max-w-3xl rounded-xl border border-danger/20 bg-red-50 p-6 text-center text-sm text-danger">
+            <p>{loadError}</p>
+            <button type="button" onClick={() => window.location.reload()} className="mt-3 rounded-lg border border-current px-4 py-2 cursor-pointer">다시 시도</button>
+          </div>
         ) : notices.length === 0 ? (
           <div className="mx-auto max-w-3xl rounded-xl bg-surface border border-border/50 p-16 text-center">
             <div className="text-text-hint mb-3">
@@ -45,6 +50,8 @@ export default function NoticesPage() {
                 }`}
               >
                 <button
+                  aria-expanded={expandedId === notice.id}
+                  aria-controls={`notice-${notice.id}`}
                   onClick={() => setExpandedId(expandedId === notice.id ? null : notice.id)}
                   className="flex w-full items-center justify-between p-5 text-left cursor-pointer"
                 >
@@ -54,10 +61,10 @@ export default function NoticesPage() {
                         고정
                       </span>
                     )}
-                    <span className="font-medium text-text truncate">{notice.title}</span>
+                    <span className="font-medium text-text break-words">{notice.title}</span>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0 ml-4">
-                    <span className="text-xs text-text-hint">
+                  <div className="flex items-center gap-2 shrink-0 ml-3">
+                    <span className="hidden sm:inline text-xs text-text-hint">
                       {new Date(notice.created_at).toLocaleDateString("ko-KR", {
                         year: "numeric",
                         month: "long",
@@ -88,9 +95,9 @@ export default function NoticesPage() {
 
                   return (
                     <div
-                      className={`overflow-hidden transition-all duration-300 ${
-                        expandedId === notice.id ? "max-h-[32rem] pb-5" : "max-h-0"
-                      }`}
+                      id={`notice-${notice.id}`}
+                      hidden={expandedId !== notice.id}
+                      className="pb-5 break-words"
                     >
                       <p className="px-5 text-text-sub text-[15px] leading-relaxed whitespace-pre-wrap">
                         {body}

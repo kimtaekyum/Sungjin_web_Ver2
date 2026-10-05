@@ -65,6 +65,7 @@ export async function fetchLatestBlogPosts(
 
     return valid;
   } catch (err) {
+    if (opts.fresh) throw err;
     console.warn("블로그 RSS 로드 실패, fallback 사용:", err);
     return fallbackPosts;
   }

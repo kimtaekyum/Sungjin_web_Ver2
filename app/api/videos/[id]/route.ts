@@ -16,7 +16,7 @@ export async function DELETE(
   const { id } = await params;
 
   const videoId = Number(id);
-  if (!Number.isInteger(videoId) || videoId <= 0) {
+  if (!Number.isSafeInteger(videoId) || videoId <= 0) {
     return NextResponse.json({ error: "올바르지 않은 영상 id입니다." }, { status: 400 });
   }
 

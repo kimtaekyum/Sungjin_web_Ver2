@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { authenticated } from "@/lib/adminAuth";
 import { fetchLatestBlogPosts } from "@/lib/blogFeed";
 import { summarizeBlogPost } from "@/lib/summarize";
 import { supabaseAdmin } from "@/lib/supabaseServer";
@@ -35,7 +36,7 @@ async function getProcessedIds(): Promise<Set<string>> {
     .select("id");
   if (error) {
     console.error("processed_blog_posts 조회 실패:", error);
-    return new Set();
+    throw new Error("처리한 블로그 목록을 조회하지 못했습니다.");
   }
   return new Set((data ?? []).map((row) => row.id as string));
 }
@@ -50,6 +51,7 @@ async function markProcessed(
     .insert({ id, title, notice_id: noticeId });
   if (error) {
     console.error("processed_blog_posts 기록 실패:", error);
+    throw new Error("블로그 처리 기록을 저장하지 못했습니다.");
   }
 }
 
@@ -79,9 +81,20 @@ async function runSync(): Promise<SyncResult> {
 
   const errors: string[] = [];
   let imported = 0;
+  let recovered = 0;
 
   for (const post of newPosts) {
     try {
+      // 공지는 저장됐지만 처리 기록이 실패했던 경우 기존 공지와 다시 연결한다.
+      const escapedLink = post.link.replace(/[\\%_]/g, (char) => `\\${char}`);
+      const { data: existing, error: lookupError } = await supabaseAdmin
+        .from("notices").select("id").like("content", `%원문 보기: ${escapedLink}`).limit(1);
+      if (lookupError) throw new Error("기존 공지사항을 조회하지 못했습니다.");
+      if (existing?.length) {
+        await markProcessed(post.link, post.title, existing[0].id);
+        recovered += 1;
+        continue;
+      }
       const cleanContent = post.description ? stripHtml(post.description) : "";
       const sourceContent = cleanContent.length > 50 ? cleanContent : post.title;
 
@@ -100,8 +113,8 @@ async function runSync(): Promise<SyncResult> {
         continue;
       }
 
-      await markProcessed(post.link, post.title, created.id);
       imported += 1;
+      await markProcessed(post.link, post.title, created.id);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       errors.push(`${post.title}: ${msg}`);
@@ -110,34 +123,28 @@ async function runSync(): Promise<SyncResult> {
 
   return {
     imported,
-    skipped: posts.length - newPosts.length,
+    skipped: posts.length - newPosts.length + recovered,
     total: posts.length,
     errors,
   };
 }
 
-/** 관리자 수동 동기화 버튼 — body.secret 인증 */
+/** 관리자 수동 동기화 — Supabase 로그인 세션 인증 */
 export async function POST(request: Request) {
-  let body: { secret?: string };
+  if (!(await authenticated(request))) {
+    return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
+  }
+  return respondToSync();
+}
+
+async function respondToSync(source?: "cron") {
   try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    const result = await runSync();
+    return NextResponse.json({ ...(source ? { source } : {}), ...result });
+  } catch (error) {
+    console.error("동기화 실패:", error);
+    return NextResponse.json({ error: "동기화를 완료하지 못했습니다. 잠시 후 다시 시도해주세요." }, { status: 503 });
   }
-
-  const expectedSecret = process.env.SYNC_SECRET;
-  if (!expectedSecret) {
-    return NextResponse.json(
-      { error: "서버에 SYNC_SECRET이 설정되지 않았습니다." },
-      { status: 500 }
-    );
-  }
-  if (body.secret !== expectedSecret) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const result = await runSync();
-  return NextResponse.json(result);
 }
 
 /** Vercel Cron 자동 동기화 (매일 KST 00:00 = UTC 15:00) — Bearer CRON_SECRET 인증 */
@@ -155,6 +162,5 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const result = await runSync();
-  return NextResponse.json({ source: "cron", ...result });
+  return respondToSync("cron");
 }

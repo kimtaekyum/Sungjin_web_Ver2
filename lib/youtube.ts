@@ -57,7 +57,7 @@ export async function fetchLatestVideos(maxResults = 10): Promise<YoutubeVideo[]
 
   if (!apiKey || !channelId) {
     console.warn("YOUTUBE_API_KEY 또는 YOUTUBE_CHANNEL_ID가 설정되지 않았습니다.");
-    return [];
+    throw new Error("유튜브 동기화 설정이 필요합니다.");
   }
 
   try {
@@ -80,6 +80,6 @@ export async function fetchLatestVideos(maxResults = 10): Promise<YoutubeVideo[]
       .filter((v): v is YoutubeVideo => v !== null && !!v.title);
   } catch (err) {
     console.error("유튜브 영상 목록 로드 실패:", err);
-    return [];
+    throw err;
   }
 }

@@ -28,14 +28,14 @@ function formatDate(dateStr: string) {
 export default function VideosPage() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [playingId, setPlayingId] = useState<number | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
   useEffect(() => {
-    getVideos().then((data) => {
-      setVideos(data);
-      setLoading(false);
-    });
+    getVideos().then(setVideos)
+      .catch((error: unknown) => setLoadError(error instanceof Error ? error.message : "목록을 불러오지 못했습니다."))
+      .finally(() => setLoading(false));
   }, []);
 
   const sortedVideos = useMemo(() => {
@@ -53,6 +53,11 @@ export default function VideosPage() {
 
         {loading ? (
           <VideoGridSkeleton count={6} />
+        ) : loadError ? (
+          <div role="alert" className="mx-auto max-w-3xl rounded-xl border border-danger/20 bg-red-50 p-6 text-center text-sm text-danger">
+            <p>{loadError}</p>
+            <button type="button" onClick={() => window.location.reload()} className="mt-3 rounded-lg border border-current px-4 py-2 cursor-pointer">다시 시도</button>
+          </div>
         ) : videos.length === 0 ? (
           <div className="mx-auto max-w-3xl rounded-xl bg-surface border border-border/50 p-16 text-center">
             <div className="text-text-hint mb-3">

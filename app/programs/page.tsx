@@ -5,7 +5,7 @@ import Button from "@/components/ui/Button";
 import { programs } from "@/data/programs";
 
 export const metadata: Metadata = {
-  title: "수업 안내 | 초등·중등·고등 프로그램 - 성진학원",
+  title: "수업 안내 | 초등·중등·고등 프로그램",
   description:
     "성진학원 초등부·중등부·고등부 교육과정. 1대1 첨삭 시스템으로 개념 완벽 흡수. 시험 4~6주 전 밀착 내신 관리.",
   alternates: { canonical: "/programs" },

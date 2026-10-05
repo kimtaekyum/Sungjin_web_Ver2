@@ -26,7 +26,7 @@ export async function getEvents(): Promise<AcademyEvent[]> {
 
   if (error) {
     console.error("일정 로드 실패:", error);
-    return [];
+    throw new Error("일정 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
   }
   return (data ?? []).map(rowToEvent);
 }

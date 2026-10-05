@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { authenticated } from "@/lib/adminAuth";
 import { fetchLatestVideos } from "@/lib/youtube";
 import { syncVideos } from "@/lib/videoSync";
 
@@ -12,28 +13,22 @@ async function runSync() {
   return syncVideos(await fetchLatestVideos());
 }
 
-/** 관리자 수동 동기화 — body.secret 인증 (sync-blog와 동일 SYNC_SECRET 재사용) */
+/** 관리자 수동 동기화 — Supabase 로그인 세션 인증 */
 export async function POST(request: Request) {
-  let body: { secret?: string };
+  if (!(await authenticated(request))) {
+    return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
+  }
+  return respondToSync();
+}
+
+async function respondToSync(source?: "cron") {
   try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    const result = await runSync();
+    return NextResponse.json({ ...(source ? { source } : {}), ...result });
+  } catch (error) {
+    console.error("동기화 실패:", error);
+    return NextResponse.json({ error: "동기화를 완료하지 못했습니다. 잠시 후 다시 시도해주세요." }, { status: 503 });
   }
-
-  const expectedSecret = process.env.SYNC_SECRET;
-  if (!expectedSecret) {
-    return NextResponse.json(
-      { error: "서버에 SYNC_SECRET이 설정되지 않았습니다." },
-      { status: 500 }
-    );
-  }
-  if (body.secret !== expectedSecret) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const result = await runSync();
-  return NextResponse.json(result);
 }
 
 /** 외부 스케줄러용 — Bearer CRON_SECRET 인증 (sync-blog와 동일 CRON_SECRET 재사용) */
@@ -51,6 +46,5 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const result = await runSync();
-  return NextResponse.json({ source: "cron", ...result });
+  return respondToSync("cron");
 }

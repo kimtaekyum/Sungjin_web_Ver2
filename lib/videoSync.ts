@@ -28,7 +28,7 @@ async function getExistingVideos(youtubeIds: string[]): Promise<Map<string, Exis
 
   if (error) {
     console.error("videos 조회 실패:", error);
-    return new Map();
+    throw new Error("기존 영상 목록을 조회하지 못했습니다.");
   }
   return new Map((data ?? []).map((row) => [row.youtube_id as string, row as ExistingVideo]));
 }

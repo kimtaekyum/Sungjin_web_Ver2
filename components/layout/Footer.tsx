@@ -19,8 +19,8 @@ export default function Footer() {
             <Image
               src="/images/logo@2x.png"
               alt={ACADEMY_INFO.name}
-              width={160}
-              height={37}
+              width={800}
+              height={185}
               className="h-7 w-auto"
             />
           </Link>
@@ -60,8 +60,8 @@ export default function Footer() {
               <Image
                 src="/images/logo@2x.png"
                 alt={ACADEMY_INFO.name}
-                width={140}
-                height={32}
+                width={800}
+                height={185}
                 className="h-8 w-auto"
               />
             </Link>

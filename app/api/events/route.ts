@@ -14,11 +14,16 @@ import { getEvents } from "@/lib/events";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const events = await getEvents();
-  return NextResponse.json(events, {
-    headers: {
-      // CDN에 1분 캐시: 관리자에서 일정 추가 후 최대 1분 내 반영.
-      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=600",
-    },
-  });
+  try {
+    const events = await getEvents();
+    return NextResponse.json(events, {
+      headers: {
+        // CDN에 1분 캐시: 관리자에서 일정 추가 후 최대 1분 내 반영.
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=600",
+      },
+    });
+  } catch (error) {
+    console.error("일정 조회 실패:", error);
+    return NextResponse.json({ error: "일정을 불러오지 못했습니다." }, { status: 503, headers: { "Cache-Control": "no-store" } });
+  }
 }

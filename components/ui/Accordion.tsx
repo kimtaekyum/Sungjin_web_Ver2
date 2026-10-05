@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
 interface AccordionProps {
   items: { question: string; answer: string }[];
 }
 
 export default function Accordion({ items }: AccordionProps) {
+  const id = useId();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
@@ -17,6 +18,8 @@ export default function Accordion({ items }: AccordionProps) {
           className="rounded-xl bg-surface border border-border/50 overflow-hidden"
         >
           <button
+            aria-expanded={openIndex === index}
+            aria-controls={`${id}-${index}`}
             onClick={() => setOpenIndex(openIndex === index ? null : index)}
             className="flex w-full items-center justify-between p-5 text-left cursor-pointer"
           >
@@ -35,9 +38,9 @@ export default function Accordion({ items }: AccordionProps) {
             </svg>
           </button>
           <div
-            className={`overflow-hidden transition-all duration-300 ${
-              openIndex === index ? "max-h-96 pb-5" : "max-h-0"
-            }`}
+            id={`${id}-${index}`}
+            hidden={openIndex !== index}
+            className="pb-5 break-words"
           >
             <p className="px-5 text-text-sub text-[15px] leading-relaxed">
               {item.answer}

@@ -8,10 +8,9 @@ import { GRADES, SCHOOL_ETC, schoolOptionsForGrade } from "@/lib/schools";
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
-/** 로컬(사용자 기기) 기준 오늘 날짜 → YYYY-MM-DD. 당일 상담 신청 허용. */
+/** 서버 검증과 같은 한국 시간 기준 날짜. */
 function todayLocal(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
 export default function ConsultForm() {
@@ -131,7 +130,8 @@ export default function ConsultForm() {
           id="consult-parent-name"
           type="text"
           required
-          value={formData.parentName}
+          maxLength={20}
+              value={formData.parentName}
           onChange={(e) => setFormData({ ...formData, parentName: e.target.value })}
           className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all"
           placeholder="이름을 입력하세요"
@@ -199,6 +199,7 @@ export default function ConsultForm() {
             <input
               type="text"
               required
+              maxLength={30}
               value={formData.schoolCustom}
               onChange={(e) => setFormData({ ...formData, schoolCustom: e.target.value })}
               className="mt-2 w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all"
@@ -255,6 +256,7 @@ export default function ConsultForm() {
             <input
               id="consult-preferred-time"
               type="text"
+              maxLength={100}
               value={formData.preferredTime}
               onChange={(e) => setFormData({ ...formData, preferredTime: e.target.value })}
               className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all"
@@ -273,7 +275,8 @@ export default function ConsultForm() {
         </label>
         <textarea
           id="consult-memo"
-          value={formData.memo}
+          maxLength={1000}
+              value={formData.memo}
           onChange={(e) => setFormData({ ...formData, memo: e.target.value })}
           rows={3}
           className="w-full rounded-lg border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 resize-none transition-all"
