@@ -167,29 +167,29 @@ export default function ResourceManager() {
             <option value="middle">중등</option><option value="high">고등</option>
           </select>
         </label>
-        <label className="text-sm font-medium">연도
-          <select disabled={busy} value={year} onChange={(e) => { setYear(e.target.value); setPage(0); setLoading(true); setMessage(""); }} className={`mt-2 ${fieldClass}`}>
-            {years.map((value) => <option key={value} value={value}>{value}년</option>)}
-          </select>
-        </label>
-        <label className="text-sm font-medium">학기
-          <select disabled={busy} value={semester} onChange={(e) => { setSemester(e.target.value); setPage(0); setLoading(true); setMessage(""); }} className={`mt-2 ${fieldClass}`}>
-            <option value="1">1학기</option><option value="2">2학기</option>
-          </select>
-        </label>
         <label className="text-sm font-medium">과목
           <select disabled={busy} value={subject} onChange={(e) => { setSubject(e.target.value as ResourceSubject); setPage(0); setLoading(true); setMessage(""); }} className={`mt-2 ${fieldClass}`}>
             {subjectsForLevel(level).map((value) => <option key={value} value={value}>{SUBJECT_LABELS[value]}</option>)}
           </select>
         </label>
       </div>
-      <div className="mt-5 grid gap-4 sm:grid-cols-3">
+      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <label className="text-sm font-medium">연도
+          <select disabled={busy} value={year} onChange={(e) => { setYear(e.target.value); setPage(0); setLoading(true); setMessage(""); }} className={`mt-2 ${fieldClass}`}>
+            {years.map((value) => <option key={value} value={value}>{value}년</option>)}
+          </select>
+        </label>
         <label className="text-sm font-medium">학교명
           <input disabled={busy} value={schoolName} onChange={(e) => setSchoolName(e.target.value)} maxLength={50} placeholder="예: 신월중학교" className={`mt-2 ${fieldClass}`} />
         </label>
         <label className="text-sm font-medium">학년
           <select disabled={busy} value={grade} onChange={(e) => setGrade(e.target.value)} className={`mt-2 ${fieldClass}`}>
             <option value="">공통 / 미지정</option>{["1", "2", "3"].map((value) => <option key={value} value={value}>{value}학년</option>)}
+          </select>
+        </label>
+        <label className="text-sm font-medium">학기
+          <select disabled={busy} value={semester} onChange={(e) => { setSemester(e.target.value); setPage(0); setLoading(true); setMessage(""); }} className={`mt-2 ${fieldClass}`}>
+            <option value="1">1학기</option><option value="2">2학기</option>
           </select>
         </label>
         <label className="text-sm font-medium">시험 구분
