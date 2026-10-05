@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import {
   RESOURCE_BUCKET, LEVEL_LABELS, SUBJECT_LABELS, EXAM_LABELS, subjectsForLevel,
@@ -24,6 +24,9 @@ export default function ResourceManager() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [reload, setReload] = useState(0);
+  const [editing, setEditing] = useState<ExamResource | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -59,39 +62,74 @@ export default function ResourceManager() {
 
   const upload = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!file || busy) return;
+    if ((!file && !editing) || busy) return;
     setMessage("");
     setBusy(true);
+    let pendingPath = "";
     try {
       if (!title.trim() || title.trim().length > 100) throw new Error("자료 제목은 1~100자로 입력해주세요.");
-      if (!file.name.toLowerCase().endsWith(".pdf") || file.size > 50 * 1024 * 1024 || file.size === 0) {
+      if (file && (!file.name.toLowerCase().endsWith(".pdf") || file.size > 50 * 1024 * 1024 || file.size === 0)) {
         throw new Error("50MB 이하의 PDF 파일을 선택해주세요.");
       }
-      const signature = new TextDecoder().decode(await file.slice(0, 5).arrayBuffer());
-      if (signature !== "%PDF-") throw new Error("PDF 형식의 파일만 업로드할 수 있습니다.");
       const token = await getToken();
-      const res = await fetch("/api/resources", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ level, year, semester, subject, schoolName: schoolName.trim(), grade, exam, title: title.trim(), fileName: file.name, size: file.size }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "업로드를 시작하지 못했습니다.");
-      const pdf = new Blob([file], { type: "application/pdf" });
-      const { error } = await supabase.storage.from(RESOURCE_BUCKET).uploadToSignedUrl(data.path, data.token, pdf, {
-        contentType: "application/pdf",
-      });
-      if (error) throw new Error(error.message);
+      const metadata = { level, year, semester, subject, schoolName: schoolName.trim(), grade, exam, title: title.trim() };
+      const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
+      if (file) {
+        const signature = new TextDecoder().decode(await file.slice(0, 5).arrayBuffer());
+        if (signature !== "%PDF-") throw new Error("PDF 형식의 파일만 업로드할 수 있습니다.");
+        const res = await fetch("/api/resources", {
+          method: "POST", headers,
+          body: JSON.stringify({ ...metadata, fileName: file.name, size: file.size,
+            ...(editing ? { purpose: "replacement", originalPath: editing.path } : {}),
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "업로드를 시작하지 못했습니다.");
+        if (editing) pendingPath = data.path;
+        const { error } = await supabase.storage.from(RESOURCE_BUCKET).uploadToSignedUrl(data.path, data.token, new Blob([file], { type: "application/pdf" }), { contentType: "application/pdf" });
+        if (error) throw new Error(error.message);
+      }
+      let warning = "";
+      if (editing) {
+        const res = await fetch("/api/resources", { method: "PATCH", headers,
+          body: JSON.stringify({ ...metadata, path: editing.path, ...(file ? { replacementPath: pendingPath, fileName: file.name } : {}) }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "자료를 수정하지 못했습니다.");
+        warning = data.warning ?? "";
+      }
       setFile(null);
       setTitle("");
-      const input = document.getElementById("resource-file") as HTMLInputElement | null;
-      if (input) input.value = "";
-      setMessage("PDF 자료를 등록했습니다.");
-      setPage(0);
+      if (fileRef.current) fileRef.current.value = "";
+      setMessage(warning || (editing ? (file ? "PDF를 교체하고 자료 정보를 저장했습니다." : "자료 정보를 수정했습니다.") : "PDF 자료를 등록했습니다."));
+      setEditing(null);
+      if (!editing || file) setPage(0);
       reloadItems();
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "업로드에 실패했습니다.");
-    } finally { setBusy(false); }
+    } finally {
+      if (pendingPath) {
+        try {
+          const token = await getToken();
+          await fetch("/api/resources", { method: "DELETE", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ path: pendingPath }) });
+        } catch (error) { console.error("임시 PDF 정리 요청 실패:", error); }
+      }
+      setBusy(false);
+    }
+  };
+
+  const edit = (item: ExamResource) => {
+    const [nextLevel, nextYear, nextSemester, nextSubject] = item.path.split("/");
+    setLevel(nextLevel as ResourceLevel); setYear(nextYear); setSemester(nextSemester); setSubject(nextSubject as ResourceSubject);
+    setEditing(item); setTitle(item.title); setSchoolName(item.schoolName ?? ""); setGrade(item.grade ?? ""); setExam(item.exam ?? "");
+    setFile(null); if (fileRef.current) fileRef.current.value = "";
+    setMessage("");
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const cancelEdit = () => {
+    setEditing(null); setFile(null); setTitle(""); setMessage("");
+    if (fileRef.current) fileRef.current.value = "";
   };
 
   const remove = async (item: ExamResource) => {
@@ -120,8 +158,9 @@ export default function ResourceManager() {
   return <section className="max-w-4xl">
     <p className="mb-6 text-sm text-text-sub">PDF를 분류별로 등록하면 학생들이 내려받을 수 있습니다.</p>
 
-    <form onSubmit={upload} className="rounded-2xl border border-border bg-surface p-5 md:p-7">
-      <h2 className="mb-5 text-lg font-semibold">PDF 자료 등록</h2>
+    <form ref={formRef} onSubmit={upload} className="scroll-mt-24 rounded-2xl border border-border bg-surface p-5 md:p-7">
+      <h2 className="mb-5 text-lg font-semibold">{editing ? "PDF 자료 수정" : "PDF 자료 등록"}</h2>
+      {editing && <p className="mb-5 break-all rounded-lg bg-bg p-3 text-sm text-text-sub">현재 파일: {editing.name}<br />파일을 선택하면 PDF가 교체됩니다. 선택하지 않으면 제목과 분류만 수정합니다.</p>}
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="text-sm font-medium">학교
           <select disabled={busy} value={level} onChange={(e) => { setLevel(e.target.value as ResourceLevel); setSubject("korean"); setPage(0); setLoading(true); setMessage(""); }} className={`mt-2 ${fieldClass}`}>
@@ -160,27 +199,34 @@ export default function ResourceManager() {
         </label>
       </div>
       <p className="mt-2 text-xs text-text-hint">학교 공통 자료는 학교명을 비워두고, 학년·시험 구분을 미지정으로 등록할 수 있습니다.</p>
-      <label htmlFor="resource-file" className="mt-5 block text-sm font-medium">PDF 파일 · 최대 50MB</label>
-      <input id="resource-file" disabled={busy} type="file" accept=".pdf,application/pdf" required onChange={(e) => {
+      <label htmlFor="resource-file" className="mt-5 block text-sm font-medium">{editing ? "교체할 PDF 파일 · 선택 사항 · 최대 50MB" : "PDF 파일 · 최대 50MB"}</label>
+      <input ref={fileRef} id="resource-file" disabled={busy} type="file" accept=".pdf,application/pdf" required={!editing} onChange={(e) => {
         const selected = e.target.files?.[0] ?? null;
         setFile(selected);
-        setTitle(selected?.name.replace(/\.pdf$/i, "").slice(0, 100) ?? "");
+        if (!editing) setTitle(selected?.name.replace(/\.pdf$/i, "").slice(0, 100) ?? "");
       }} className="mt-2 block min-w-0 w-full rounded-lg border border-border bg-white p-3 text-sm" />
       <label htmlFor="resource-title" className="mt-5 block text-sm font-medium">자료 제목</label>
       <input id="resource-title" disabled={busy} type="text" required maxLength={100} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="예: 2026년 2학기 국어 내신 분석" className={`mt-2 ${fieldClass}`} />
-      <p className="mt-2 text-xs text-text-hint">파일명에서 자동으로 채워지며, 원하는 제목으로 수정할 수 있습니다.</p>
-      <button type="submit" disabled={busy || !file || !title.trim()} className="mt-5 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white disabled:opacity-50">{busy ? "처리 중..." : "자료 등록"}</button>
+      <p className="mt-2 text-xs text-text-hint">{editing ? "교체 파일을 선택해도 자료 제목은 유지됩니다. 원하는 제목으로 수정할 수 있습니다." : "파일명에서 자동으로 채워지며, 원하는 제목으로 수정할 수 있습니다."}</p>
+      <div className="mt-5 flex flex-wrap gap-2">
+        <button type="submit" disabled={busy || (!file && !editing) || !title.trim()} className="rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white disabled:opacity-50">{busy ? "처리 중..." : editing ? "수정 저장" : "자료 등록"}</button>
+        {editing && <button type="button" disabled={busy} onClick={cancelEdit} className="rounded-lg border border-border px-5 py-2.5 text-sm disabled:opacity-50">수정 취소</button>}
+      </div>
       {message && <p role="status" className="mt-3 text-sm text-text-sub">{message}</p>}
     </form>
 
     <div className="mt-9">
       <h2 className="mb-4 text-lg font-semibold">{LEVEL_LABELS[level]} · {year}년 · {semester}학기 · {SUBJECT_LABELS[subject]} 자료</h2>
       {loading ? <p className="text-text-sub">목록을 불러오는 중입니다...</p> : items.length === 0 ? <p className="rounded-xl border border-border bg-surface p-8 text-center text-text-sub">등록된 파일이 없습니다.</p> :
-        <ul className="space-y-2">{items.map((item) => <li key={item.path} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface p-4">
+        <ul className="space-y-2">{items.map((item) => <li key={item.path} className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0"><p className="break-all text-sm font-medium">{item.title || item.name}</p>
             <p className="mt-1 break-all text-xs text-text-sub">{[item.schoolName, item.grade && `${item.grade}학년`, item.exam && EXAM_LABELS[item.exam]].filter(Boolean).join(" · ") || "공통 자료"}</p>
             <p className="mt-1 break-all text-xs text-text-hint">{item.name} · {new Date(item.createdAt).toLocaleDateString("ko-KR")}</p></div>
-          <button type="button" disabled={busy} onClick={() => void remove(item)} className="shrink-0 rounded-lg border border-danger/30 px-3 py-2 text-sm text-danger disabled:opacity-50">삭제</button>
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <a href={`/api/resources/preview?path=${encodeURIComponent(item.path)}`} target="_blank" rel="noopener noreferrer" aria-label={`${item.title || item.name} PDF 미리보기 (새 창)`} className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-bg">미리보기</a>
+            <button type="button" disabled={busy} onClick={() => edit(item)} className="rounded-lg border border-border px-3 py-2 text-sm disabled:opacity-50">수정</button>
+            <button type="button" disabled={busy || Boolean(editing)} onClick={() => void remove(item)} className="rounded-lg border border-danger/30 px-3 py-2 text-sm text-danger disabled:opacity-50">삭제</button>
+          </div>
         </li>)}</ul>}
       {(page > 0 || hasMore) && <div className="mt-5 flex justify-center gap-3">
         <button type="button" disabled={page === 0 || busy || loading} onClick={() => { setPage(page - 1); setLoading(true); }} className="rounded-lg border border-border px-4 py-2 text-sm disabled:opacity-40">이전</button>

@@ -60,6 +60,10 @@ export function validResourcePath(path: unknown): path is string {
     /^[0-9a-f-]{36}__[A-Za-z0-9_-]+$/.test(parts[4]);
 }
 
+export function validPendingResourcePath(path: unknown): path is string {
+  return typeof path === "string" && /^_pending\/[0-9a-f-]{36}\.pdf$/.test(path);
+}
+
 export function resourceDetailsFromPath(path: string): { name: string; title: string } & ResourceMetadata {
   const emptyMetadata: ResourceMetadata = { schoolName: "", grade: "", exam: "" };
   try {

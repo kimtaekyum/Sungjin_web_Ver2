@@ -7,7 +7,7 @@ export async function completeStaleConsultations(now = new Date()) {
   const cutoff = new Date(now.getTime() - AUTO_CONTACT_AFTER_MS).toISOString();
   const { count, error } = await supabaseAdmin
     .from("consultations")
-    .update({ status: "contacted" }, { count: "exact" })
+    .update({ status: "contacted", auto_completed_at: now.toISOString() }, { count: "exact" })
     .eq("status", "new")
     .lte("created_at", cutoff);
 

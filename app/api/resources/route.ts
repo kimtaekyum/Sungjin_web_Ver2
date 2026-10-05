@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseServer";
 import {
-  RESOURCE_BUCKET, resourceDetailsFromPath, resourceFolder, validCategory, validResourcePath, validResourceMetadata,
+  RESOURCE_BUCKET, resourceDetailsFromPath, resourceFolder, validCategory, validResourcePath, validPendingResourcePath, validResourceMetadata,
   type ExamResource,
 } from "@/lib/resources";
 
@@ -74,6 +74,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "요청 형식이 올바르지 않습니다." }, { status: 400 });
   }
   const body = input as Record<string, unknown>;
+  if (body.purpose !== undefined && body.purpose !== "replacement") {
+    return NextResponse.json({ error: "업로드 요청이 올바르지 않습니다." }, { status: 400 });
+  }
+  if (body.purpose === "replacement" && !validResourcePath(body.originalPath)) {
+    return NextResponse.json({ error: "교체할 자료가 올바르지 않습니다." }, { status: 400 });
+  }
   if (!validResourceMetadata(body)) {
     return NextResponse.json({ error: "학교명은 50자 이하, 학년은 1~3학년, 시험은 중간·기말고사로 선택해주세요." }, { status: 400 });
   }
@@ -115,7 +121,8 @@ export async function POST(request: Request) {
   }
 
   const details = JSON.stringify({ name: cleanName, title, schoolName: typeof body.schoolName === "string" ? body.schoolName.trim() : "", grade: body.grade ?? "", exam: body.exam ?? "" });
-  const path = `${resourceFolder(level, year, semester, subject)}/${crypto.randomUUID()}__${Buffer.from(details).toString("base64url")}`;
+  const path = body.purpose === "replacement" ? `_pending/${crypto.randomUUID()}.pdf`
+    : `${resourceFolder(level, year, semester, subject)}/${crypto.randomUUID()}__${Buffer.from(details).toString("base64url")}`;
   const { data, error } = await storage.from(RESOURCE_BUCKET).createSignedUploadUrl(path);
   if (error) {
     console.error("내신분석실 업로드 URL 생성 실패:", error);
@@ -124,15 +131,80 @@ export async function POST(request: Request) {
   return NextResponse.json({ path, token: data.token });
 }
 
+export async function PATCH(request: Request) {
+  if (!(await authenticated(request))) return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
+  let input: unknown;
+  try { input = await request.json(); } catch { return NextResponse.json({ error: "요청 형식이 올바르지 않습니다." }, { status: 400 }); }
+  if (!input || typeof input !== "object" || Array.isArray(input)) return NextResponse.json({ error: "요청 형식이 올바르지 않습니다." }, { status: 400 });
+  const body = input as Record<string, unknown>;
+  const oldPath = body.path;
+  const replacement = body.replacementPath;
+  if (!validResourcePath(oldPath) || (replacement !== undefined && !validPendingResourcePath(replacement))) {
+    return NextResponse.json({ error: "수정할 파일 경로가 올바르지 않습니다." }, { status: 400 });
+  }
+  const original = resourceDetailsFromPath(oldPath);
+  const title = typeof body.title === "string" ? body.title.trim() : "";
+  const name = replacement ? (typeof body.fileName === "string" ? body.fileName.trim() : "") : original.name;
+  if (!validCategory(body.level, body.year, body.semester, body.subject) || !validResourceMetadata(body) ||
+      !title || title.length > 100 || /[\x00-\x1f]/.test(title) || !name.toLowerCase().endsWith(".pdf") || name.length > 120 || /[\\/\x00-\x1f]/.test(name)) {
+    return NextResponse.json({ error: "제목, 파일명 또는 분류가 올바르지 않습니다." }, { status: 400 });
+  }
+  const storage = supabaseAdmin.storage.from(RESOURCE_BUCKET);
+  const { error: missing } = await storage.info(oldPath);
+  if (missing) return NextResponse.json({ error: "자료가 삭제되거나 변경되었습니다. 목록을 새로고침해주세요." }, { status: 409 });
+
+  if (replacement) {
+    const { data: info, error } = await storage.info(replacement);
+    const size = Number(info?.size ?? info?.metadata?.size ?? 0);
+    if (error || size < 1 || size > 50 * 1024 * 1024) return NextResponse.json({ error: "교체할 PDF 업로드를 확인해주세요." }, { status: 400 });
+    const { data: signed, error: signedError } = await storage.createSignedUrl(replacement, 60);
+    if (signedError || !signed) return NextResponse.json({ error: "교체할 파일을 확인하지 못했습니다." }, { status: 500 });
+    const file = await fetch(signed.signedUrl, { headers: { Range: "bytes=0-4" }, cache: "no-store" });
+    const reader = file.body?.getReader();
+    const signature = new Uint8Array(5);
+    let length = 0;
+    if (file.ok && reader) {
+      try {
+        while (length < 5) {
+          const chunk = await reader.read();
+          if (chunk.done) break;
+          const slice = chunk.value.subarray(0, 5 - length);
+          signature.set(slice, length); length += slice.length;
+        }
+      } finally { await reader.cancel(); }
+    }
+    if (length !== 5 || new TextDecoder().decode(signature) !== "%PDF-") return NextResponse.json({ error: "PDF 형식의 파일만 교체할 수 있습니다." }, { status: 400 });
+  }
+
+  const details = JSON.stringify({ name, title, schoolName: typeof body.schoolName === "string" ? body.schoolName.trim() : "", grade: body.grade ?? "", exam: body.exam ?? "" });
+  const uuid = replacement ? crypto.randomUUID() : oldPath.split("/").at(-1)!.slice(0, 36);
+  const path = `${resourceFolder(body.level as string, body.year as string, body.semester as string, body.subject as string)}/${uuid}__${Buffer.from(details).toString("base64url")}`;
+  if (!replacement && path === oldPath) return NextResponse.json({ ok: true, path });
+  const { error: moveError } = await storage.move(replacement ?? oldPath, path);
+  if (moveError) {
+    console.error("자료 수정 실패:", moveError);
+    return NextResponse.json({ error: "자료를 저장하지 못했습니다. 기존 PDF는 유지됩니다." }, { status: 500 });
+  }
+  if (replacement) {
+    // 새 PDF의 검증과 저장이 완료된 뒤에 기존 파일을 삭제한다.
+    const { data, error } = await storage.remove([oldPath]);
+    if (error || !data?.length) {
+      console.error("교체 후 기존 자료 정리 실패:", error);
+      return NextResponse.json({ ok: true, path, warning: "새 PDF는 저장됐지만 기존 자료 정리를 완료하지 못했습니다. 목록에서 기존 자료를 확인해주세요." });
+    }
+  }
+  return NextResponse.json({ ok: true, path });
+}
+
 export async function DELETE(request: Request) {
   if (!(await authenticated(request))) return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
   let input: unknown;
   try { input = await request.json(); } catch { return NextResponse.json({ error: "요청 형식이 올바르지 않습니다." }, { status: 400 }); }
   const path = input && typeof input === "object" ? (input as Record<string, unknown>).path : null;
-  if (!validResourcePath(path)) return NextResponse.json({ error: "파일 경로가 올바르지 않습니다." }, { status: 400 });
+  if (!validResourcePath(path) && !validPendingResourcePath(path)) return NextResponse.json({ error: "파일 경로가 올바르지 않습니다." }, { status: 400 });
 
   const { data, error } = await supabaseAdmin.storage.from(RESOURCE_BUCKET).remove([path]);
-  if (error || !data?.length) {
+  if (error || (!data?.length && !validPendingResourcePath(path))) {
     console.error("내신분석실 삭제 실패:", error);
     return NextResponse.json({ error: "파일을 삭제하지 못했습니다." }, { status: 500 });
   }

@@ -19,6 +19,7 @@ export interface Consultation {
   alimtalk_status: AlimtalkStatus;
   alimtalk_sent_at: string | null;
   created_at: string;
+  auto_completed_at: string | null;
 }
 
 /**
@@ -59,7 +60,7 @@ export async function updateConsultationStatus(
 ): Promise<boolean> {
   const { error } = await supabase
     .from("consultations")
-    .update({ status })
+    .update({ status, auto_completed_at: null })
     .eq("id", id);
 
   if (error) {

@@ -157,10 +157,12 @@ export default function ExamAnalysisPage() {
                     </div>
                     <p className="mt-1 text-xs text-text-hint">PDF · {item.size ? `${(item.size / 1024 / 1024).toFixed(1)} MB · ` : ""}{new Date(item.createdAt).toLocaleDateString("ko-KR")}</p>
                   </div>
-                  <a href={`/api/resources/download?path=${encodeURIComponent(item.path)}`}
-                    className="shrink-0 rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-primary-hover">
-                    다운로드
-                  </a>
+                  <div className="flex shrink-0 gap-2">
+                    <a href={`/api/resources/preview?path=${encodeURIComponent(item.path)}`} target="_blank" rel="noopener noreferrer" aria-label={`${item.title || item.name} PDF 미리보기 (새 창)`}
+                      className="flex-1 rounded-lg border border-border px-4 py-2.5 text-center text-sm font-medium text-text hover:bg-bg sm:flex-none">미리보기</a>
+                    <a href={`/api/resources/download?path=${encodeURIComponent(item.path)}`}
+                      className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-primary-hover sm:flex-none">다운로드</a>
+                  </div>
                 </li>)}</ul>}
           {(page > 0 || hasMore) && <div className="mt-5 flex justify-center gap-3">
             <button type="button" disabled={page === 0 || loading} onClick={() => { setPage(page - 1); setLoading(true); }} className="rounded-lg border border-border px-4 py-2 text-sm disabled:opacity-40">이전</button>

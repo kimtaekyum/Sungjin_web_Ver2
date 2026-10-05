@@ -3,5 +3,5 @@ import { serveResourceFile } from "@/lib/resourceFile";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  return serveResourceFile(request, "attachment");
+  return serveResourceFile(request, "inline");
 }

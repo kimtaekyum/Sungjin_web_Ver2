@@ -97,6 +97,8 @@ export default function AdminPage() {
   // Consultations state
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loadingConsultations, setLoadingConsultations] = useState(false);
+  const [consultationSearch, setConsultationSearch] = useState("");
+  const [consultationStatus, setConsultationStatus] = useState<ConsultationStatus | "all">("all");
 
   // Confirm delete dialog
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -410,6 +412,13 @@ export default function AdminPage() {
   };
 
   const newConsultationCount = consultations.filter((c) => c.status === "new").length;
+  const search = consultationSearch.trim().normalize("NFKC").toLocaleLowerCase("ko-KR");
+  const phoneSearch = search.replace(/[\s()-]/g, "");
+  const filteredConsultations = consultations.filter((c) =>
+    (consultationStatus === "all" || c.status === consultationStatus) &&
+    (!search || c.parent_name.normalize("NFKC").toLocaleLowerCase("ko-KR").includes(search) ||
+      (/^\d+$/.test(phoneSearch) && c.phone.includes(phoneSearch)))
+  );
 
   // 초기 세션 확인 중 — 로그인 폼이 깜빡 보이는 것을 방지
   if (authenticated === null) {
@@ -1051,6 +1060,21 @@ export default function AdminPage() {
           // ===== Consultations tab =====
           <div>
             <p className="mb-5 text-sm text-text-sub">신규 신청은 접수 후 7일이 지나면 자동으로 연락 완료 처리됩니다.</p>
+            <div className="mb-6 space-y-4 rounded-xl border border-border/50 bg-surface p-4 md:p-5">
+              <div>
+                <label htmlFor="consultation-search" className="mb-2 block text-sm font-medium">상담 신청 검색</label>
+                <input id="consultation-search" type="search" maxLength={100} value={consultationSearch} onChange={(e) => setConsultationSearch(e.target.value)} placeholder="학부모 이름 또는 전화번호" className="w-full rounded-lg border border-border bg-white px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+              </div>
+              <div role="group" aria-label="상담 상태 필터" className="flex flex-wrap gap-2">
+                {(["all", "new", "contacted", "enrolled", "declined"] as const).map((status) => (
+                  <button key={status} type="button" aria-pressed={consultationStatus === status} onClick={() => setConsultationStatus(status)} className={`rounded-lg px-3 py-2 text-sm font-medium cursor-pointer ${consultationStatus === status ? "bg-primary text-white" : "bg-bg text-text-sub hover:text-primary"}`}>
+                    {status === "all" ? "전체" : STATUS_LABEL[status]} {status === "all" ? consultations.length : consultations.filter((c) => c.status === status).length}
+                  </button>
+                ))}
+              </div>
+              {(consultationSearch || consultationStatus !== "all") && <button type="button" onClick={() => { setConsultationSearch(""); setConsultationStatus("all"); }} className="text-sm text-text-sub underline underline-offset-4">검색 조건 초기화</button>}
+              {!loadingConsultations && <p role="status" className="text-xs text-text-hint">검색 결과 {filteredConsultations.length}건 · 전체 {consultations.length}건</p>}
+            </div>
             {loadingConsultations ? (
               <AdminCardListSkeleton count={3} />
             ) : consultations.length === 0 ? (
@@ -1063,9 +1087,11 @@ export default function AdminPage() {
                   상담 페이지에서 신청이 들어오면 이곳에 표시됩니다.
                 </p>
               </div>
+            ) : filteredConsultations.length === 0 ? (
+              <div className="rounded-xl border border-border/50 bg-surface p-10 text-center text-sm text-text-sub">검색 조건에 맞는 상담 신청이 없습니다.</div>
             ) : (
               <div className="space-y-3">
-                {consultations.map((c) => (
+                {filteredConsultations.map((c) => (
                   <div
                     key={c.id}
                     className={`rounded-xl bg-surface border p-5 ${
@@ -1080,6 +1106,7 @@ export default function AdminPage() {
                           >
                             {STATUS_LABEL[c.status]}
                           </span>
+                          {c.status === "contacted" && c.auto_completed_at && <span className="rounded bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">자동 처리</span>}
                           <div className="flex items-baseline gap-1.5 min-w-0">
                             <h3 className="text-[15px] font-medium text-[#444444] truncate">
                               {c.parent_name}
@@ -1135,6 +1162,7 @@ export default function AdminPage() {
                         <p className="text-xs text-text-hint">
                           접수: {formatConsultationDate(c.created_at)}
                         </p>
+                        {c.status === "contacted" && c.auto_completed_at && <p className="text-xs text-text-hint">자동 처리: {formatConsultationDate(c.auto_completed_at)}</p>}
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <select
