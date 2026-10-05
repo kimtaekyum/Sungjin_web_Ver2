@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import FaIcon from "@/components/ui/FaIcon";
 import { AdminCardListSkeleton } from "@/components/ui/Skeleton";
+import ResourceManager from "@/components/admin/ResourceManager";
 import { supabase } from "@/lib/supabase";
 import { getNotices, addNotice, updateNotice, deleteNotice, type Notice } from "@/lib/notices";
 import { getEvents, addEvent, updateEvent, deleteEvent } from "@/lib/events";
@@ -17,7 +18,7 @@ import {
 import { getVideos, deleteVideo, type Video } from "@/lib/videos";
 import type { AcademyEvent } from "@/data/events";
 
-type Tab = "notices" | "events" | "videos" | "consultations";
+type Tab = "notices" | "events" | "videos" | "resources" | "consultations";
 
 const STATUS_LABEL: Record<ConsultationStatus, string> = {
   new: "신규",
@@ -136,6 +137,7 @@ export default function AdminPage() {
   // 초기 진입: 저장된 세션 확인 + 이후 로그인/로그아웃 이벤트 구독
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
+      if (new URLSearchParams(window.location.search).get("tab") === "resources") setActiveTab("resources");
       setAuthenticated(!!data.session);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -480,6 +482,8 @@ export default function AdminPage() {
       ? "학사일정 관리"
       : activeTab === "videos"
       ? "강의영상 관리"
+      : activeTab === "resources"
+      ? "내신분석실 관리"
       : "상담 신청 관리";
 
   // Admin dashboard
@@ -490,7 +494,7 @@ export default function AdminPage() {
         <div className="mx-auto max-w-[1200px] px-4 md:px-6 py-5 md:py-0 md:h-20 flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <h1 className="text-base md:text-lg font-medium text-[#444444] truncate">{currentTitle}</h1>
-            <span className="text-[11px] md:text-xs text-text-hint bg-bg px-2 py-0.5 rounded-full shrink-0">{currentCount}개</span>
+            {activeTab !== "resources" && <span className="text-[11px] md:text-xs text-text-hint bg-bg px-2 py-0.5 rounded-full shrink-0">{currentCount}개</span>}
           </div>
           <div className="flex items-center gap-2 md:gap-3 flex-wrap">
             {activeTab === "notices" && (
@@ -586,6 +590,17 @@ export default function AdminPage() {
             </button>
             <button
               type="button"
+              onClick={() => setActiveTab("resources")}
+              className={`py-4 text-sm font-medium transition-colors border-b-2 -mb-px cursor-pointer whitespace-nowrap ${
+                activeTab === "resources"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-text-sub hover:text-text"
+              }`}
+            >
+              내신분석실
+            </button>
+            <button
+              type="button"
               onClick={() => setActiveTab("consultations")}
               className={`py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === "consultations"
@@ -650,7 +665,9 @@ export default function AdminPage() {
       </div>
 
       <div className="mx-auto max-w-[1200px] px-4 md:px-6 py-10 md:py-12">
-        {activeTab === "notices" ? (
+        {activeTab === "resources" ? (
+          <ResourceManager />
+        ) : activeTab === "notices" ? (
           <div className="grid gap-8 md:grid-cols-[380px_1fr]">
             {/* Notice form */}
             <div>

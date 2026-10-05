@@ -46,6 +46,17 @@ html {
   scroll-behavior: smooth;
 }
 
+/* 선택 칸의 화살표에 오른쪽 테두리와 작은 고정 간격을 둔다. */
+select:not([multiple]):not([size]) {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232C2C2A' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px 16px;
+  padding-right: 2.5rem;
+}
+
 /* Card hover */
 .card-hover {
   transition: border-color 0.2s ease;

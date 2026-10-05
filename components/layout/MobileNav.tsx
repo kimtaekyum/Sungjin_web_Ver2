@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { NAV_ITEMS, ACADEMY_INFO } from "@/lib/constants";
+import { usePathname } from "next/navigation";
+import { NAV_ITEMS, ACADEMY_INFO, isNavActive } from "@/lib/constants";
 
 interface MobileNavProps {
   open: boolean;
@@ -13,16 +14,47 @@ interface MobileNavProps {
 export default function MobileNav({ open, onClose }: MobileNavProps) {
   const [mounted, setMounted] = useState(false);
   const [shown, setShown] = useState(false);
+  const [resourcesOpen, setResourcesOpen] = useState(false);
+  const pathname = usePathname();
+  const drawerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!shown || !open) return;
+    const previousFocus = document.activeElement;
+    drawerRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    return () => {
+      if (previousFocus instanceof HTMLElement && previousFocus.getClientRects().length) previousFocus.focus();
+    };
+  }, [shown, open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const desktop = window.matchMedia("(min-width: 1280px)");
+    const closeOnDesktop = () => { if (desktop.matches) onClose(); };
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    desktop.addEventListener("change", closeOnDesktop);
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      desktop.removeEventListener("change", closeOnDesktop);
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open, onClose]);
 
   useEffect(() => {
     if (open) {
-      setMounted(true);
-      const raf = requestAnimationFrame(() => setShown(true));
-      return () => cancelAnimationFrame(raf);
+      let shownFrame = 0;
+      const mountedFrame = requestAnimationFrame(() => {
+        setMounted(true);
+        shownFrame = requestAnimationFrame(() => setShown(true));
+      });
+      return () => { cancelAnimationFrame(mountedFrame); cancelAnimationFrame(shownFrame); };
     }
-    setShown(false);
+    const frame = requestAnimationFrame(() => { setShown(false); setResourcesOpen(false); });
     const t = setTimeout(() => setMounted(false), 300);
-    return () => clearTimeout(t);
+    return () => { cancelAnimationFrame(frame); clearTimeout(t); };
   }, [open]);
 
   if (!mounted) return null;
@@ -31,7 +63,7 @@ export default function MobileNav({ open, onClose }: MobileNavProps) {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-50 bg-[#2C2C2A]/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
+        className={`fixed inset-0 z-50 bg-[#2C2C2A]/60 backdrop-blur-sm transition-opacity duration-300 xl:hidden ${
           shown ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -39,11 +71,25 @@ export default function MobileNav({ open, onClose }: MobileNavProps) {
 
       {/* Drawer */}
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-80 max-w-[85vw] bg-surface shadow-2xl transition-transform duration-300 md:hidden ${
-          shown ? "translate-x-0" : "translate-x-full"
+        ref={drawerRef}
+        role="dialog"
+        aria-label="사이트 메뉴"
+        aria-modal="true"
+        aria-hidden={!open}
+        onKeyDown={(event) => {
+          if (event.key !== "Tab") return;
+          const targets = Array.from(drawerRef.current?.querySelectorAll<HTMLElement>("a[href], button:not([disabled])") ?? []).filter((target) => target.getClientRects().length > 0);
+          if (!targets?.length) return;
+          const first = targets[0];
+          const last = targets[targets.length - 1];
+          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+          else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        }}
+        className={`fixed top-0 right-0 z-50 flex h-dvh w-80 max-w-[85vw] flex-col bg-surface shadow-2xl transition-transform duration-300 xl:hidden ${
+          shown ? "translate-x-0" : "translate-x-full pointer-events-none"
         }`}
       >
-        <div className="flex items-center justify-between p-5 border-b border-border/50">
+        <div className="flex shrink-0 items-center justify-between p-5 border-b border-border/50">
           <Image
             src="/images/logo@2x.png"
             alt={ACADEMY_INFO.name}
@@ -58,17 +104,28 @@ export default function MobileNav({ open, onClose }: MobileNavProps) {
           </button>
         </div>
 
-        <nav className="flex flex-col p-5 gap-1">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onClose}
-              className="rounded-xl px-4 py-3.5 text-[15px] font-medium text-text hover:bg-bg transition-colors"
-            >
-              {item.label}
-            </Link>
-          ))}
+        <nav aria-label="모바일 주 메뉴" className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain p-5 gap-1">
+          {NAV_ITEMS.map((item) => {
+            if ("href" in item) {
+              const active = isNavActive(pathname, item.href);
+              return <Link key={item.href} href={item.href} onClick={onClose} aria-current={active ? "page" : undefined} className={`rounded-xl px-4 py-3.5 text-[15px] font-medium hover:bg-bg transition-colors ${active ? "bg-bg text-primary" : "text-text"}`}>{item.label}</Link>;
+            }
+            const active = item.children.some((child) => isNavActive(pathname, child.href));
+            return (
+              <div key={item.label}>
+                <button type="button" aria-expanded={resourcesOpen} aria-controls="mobile-resources" onClick={() => setResourcesOpen(!resourcesOpen)} className={`flex w-full items-center justify-between rounded-xl px-4 py-3.5 text-[15px] font-medium cursor-pointer hover:bg-bg transition-colors ${active || resourcesOpen ? "text-primary" : "text-text"}`}>
+                  {item.label}
+                  <svg aria-hidden="true" className={`h-4 w-4 transition-transform ${resourcesOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </button>
+                <div id="mobile-resources" hidden={!resourcesOpen} className="ml-4 border-l border-border/50 pl-2">
+                  {item.children.map((child) => {
+                    const selected = isNavActive(pathname, child.href);
+                    return <Link key={child.href} href={child.href} onClick={onClose} aria-current={selected ? "page" : undefined} className={`block rounded-lg px-4 py-3 text-sm font-medium hover:bg-bg transition-colors ${selected ? "bg-bg text-primary" : "text-text-sub"}`}>{child.label}</Link>;
+                  })}
+                </div>
+              </div>
+            );
+          })}
           <div className="mt-6 pt-6 border-t border-border/50">
             <Link
               href="/contact"

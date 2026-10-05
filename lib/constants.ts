@@ -14,12 +14,24 @@ export const ACADEMY_INFO = {
   established: "30",
 } as const;
 
-export const NAV_ITEMS = [
+export type NavLink = { label: string; href: string };
+export type NavItem = NavLink | { label: string; children: readonly NavLink[] };
+
+export const NAV_ITEMS: readonly NavItem[] = [
   { label: "홈", href: "/" },
   { label: "학원소개", href: "/about" },
   { label: "수업 안내", href: "/programs" },
   { label: "실적 & 후기", href: "/results" },
   { label: "공지사항", href: "/notices" },
-  { label: "강의영상", href: "/videos" },
-  { label: "상담 & 등록", href: "/contact" },
-] as const;
+  {
+    label: "자료실",
+    children: [
+      { label: "강의영상", href: "/videos" },
+      { label: "내신분석실", href: "/exam-analysis" },
+    ],
+  },
+];
+
+export function isNavActive(pathname: string, href: string) {
+  return pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+}

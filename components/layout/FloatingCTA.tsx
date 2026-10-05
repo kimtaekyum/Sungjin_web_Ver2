@@ -1,8 +1,12 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { ACADEMY_INFO } from "@/lib/constants";
 
 export default function FloatingCTA() {
+  const pathname = usePathname();
+  if (pathname === "/exam-analysis" || pathname === "/admin" || pathname.startsWith("/admin/")) return null;
+
   return (
     <div className="fixed right-4 bottom-6 z-40 flex flex-col gap-3 md:right-8 md:bottom-8">
       {/* 상담 신청 플로팅 버튼 */}

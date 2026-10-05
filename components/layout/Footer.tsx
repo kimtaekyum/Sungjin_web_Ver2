@@ -76,7 +76,7 @@ export default function Footer() {
               바로가기
             </h4>
             <nav className="flex flex-col gap-2.5">
-              {NAV_ITEMS.map((item) => (
+              {NAV_ITEMS.map((item) => "href" in item ? (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -84,6 +84,15 @@ export default function Footer() {
                 >
                   {item.label}
                 </Link>
+              ) : (
+                <div key={item.label} className="flex flex-col gap-2.5">
+                  <span className="text-sm text-white/60">{item.label}</span>
+                  <div className="ml-1 flex flex-col gap-2.5 border-l border-white/15 pl-3">
+                    {item.children.map((child) => (
+                      <Link key={child.href} href={child.href} className="text-sm text-white/60 hover:text-white transition-colors">{child.label}</Link>
+                    ))}
+                  </div>
+                </div>
               ))}
             </nav>
           </div>

@@ -1,10 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { NAV_ITEMS, ACADEMY_INFO } from "@/lib/constants";
+import { usePathname } from "next/navigation";
+import { NAV_ITEMS, ACADEMY_INFO, isNavActive, type NavItem } from "@/lib/constants";
 import MobileNav from "./MobileNav";
+
+function DesktopNavItem({ item }: { item: NavItem }) {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const dismiss = (event: PointerEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const desktop = window.matchMedia("(min-width: 1280px)");
+    const dismissOnMobile = () => { if (!desktop.matches) setOpen(false); };
+    document.addEventListener("pointerdown", dismiss);
+    desktop.addEventListener("change", dismissOnMobile);
+    return () => {
+      document.removeEventListener("pointerdown", dismiss);
+      desktop.removeEventListener("change", dismissOnMobile);
+    };
+  }, [open]);
+
+  if ("href" in item) {
+    const active = isNavActive(pathname, item.href);
+    return <Link href={item.href} aria-current={active ? "page" : undefined} className={`text-[14px] font-medium tracking-wide hover:text-primary transition-colors ${active ? "text-primary" : "text-text"}`}>{item.label}</Link>;
+  }
+
+  const active = item.children.some((child) => isNavActive(pathname, child.href));
+  return (
+    <div ref={containerRef} className="relative" onBlur={(event) => {
+      if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+    }} onKeyDown={(event) => {
+      if (event.key === "Escape" && open) {
+        event.preventDefault();
+        setOpen(false);
+        buttonRef.current?.focus();
+      }
+    }}>
+      <button ref={buttonRef} type="button" aria-expanded={open} aria-controls="desktop-resources" onClick={() => setOpen(!open)} className={`flex items-center gap-1.5 cursor-pointer text-[14px] font-medium tracking-wide hover:text-primary transition-colors ${active || open ? "text-primary" : "text-text"}`}>
+        {item.label}
+        <svg aria-hidden="true" className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      </button>
+      <div id="desktop-resources" hidden={!open} className="absolute top-full right-0 mt-4 w-44 rounded-xl border border-border/50 bg-surface p-2 shadow-lg">
+        {item.children.map((child) => {
+          const selected = isNavActive(pathname, child.href);
+          return <Link key={child.href} href={child.href} onClick={() => setOpen(false)} aria-current={selected ? "page" : undefined} className={`block rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-bg hover:text-primary ${selected ? "bg-bg text-primary" : "text-text"}`}>{child.label}</Link>;
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -29,15 +81,9 @@ export default function Header() {
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-7">
+        <nav aria-label="주 메뉴" className="hidden xl:flex items-center gap-5">
           {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-[14px] font-medium tracking-wide text-text hover:text-primary transition-colors"
-            >
-              {item.label}
-            </Link>
+            <DesktopNavItem key={item.label} item={item} />
           ))}
           <Link
             href="/contact"
@@ -50,7 +96,7 @@ export default function Header() {
         {/* Mobile Hamburger */}
         <button
           onClick={() => setMobileOpen(true)}
-          className="md:hidden p-2 cursor-pointer"
+          className="xl:hidden p-2 cursor-pointer"
           aria-label="메뉴 열기"
         >
           <svg

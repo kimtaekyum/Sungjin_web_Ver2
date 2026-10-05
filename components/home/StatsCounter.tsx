@@ -45,7 +45,7 @@ function AnimatedNumber({ value, prefix, suffix, duration: durationProp }: { val
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
-  }, [num]);
+  }, [num, durationProp]);
 
   return (
     <div ref={ref} className="font-heading text-4xl font-semibold tracking-tight text-primary md:text-[56px] leading-none">

@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import path from "path";
+import { networkInterfaces } from "node:os";
 
 const securityHeaders = [
   // HTTPS 강제 (2년, 서브도메인 포함, HSTS preload 등록 가능)
@@ -40,6 +41,11 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: Object.values(networkInterfaces()).flatMap((interfaces) =>
+    (interfaces ?? [])
+      .filter((entry) => entry.family === "IPv4" && !entry.internal)
+      .map((entry) => entry.address)
+  ),
   turbopack: {
     root: path.resolve(__dirname),
   },

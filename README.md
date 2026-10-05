@@ -1,6 +1,20 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+성진학원 웹사이트 (Next.js 16).
+
+## 내신분석실
+
+- 학생: `/exam-analysis`에서 중등·고등 → 연도 → 학기 → 과목을 선택해 PDF를 다운로드합니다.
+- 학교명·학년·중간/기말고사 필터와 학교명/제목 검색을 지원합니다. 검색은 선택한 분류의 전체 자료에 적용됩니다.
+- 관리자: `/admin` 로그인 후 **강의영상 옆 내신분석실 탭**에서 50MB 이하 PDF를 등록하거나 삭제합니다.
+- 등록 시 학교명·학년·시험 구분을 선택할 수 있으며, 공통 자료는 비워둘 수 있습니다. 기존 자료도 전체 목록에서 계속 표시됩니다.
+- 파일은 Supabase Storage의 비공개 `exam-analysis` 버킷에 저장됩니다. 버킷이 없으면 첫 업로드 시 자동 생성됩니다. 파일 목록과 다운로드는 서버 API를 거치며, 업로드는 서명된 URL로 Storage에 직접 전송합니다.
+- 서버 환경변수 `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SUPABASE_URL` 및 관리자 Supabase Auth 계정이 필요합니다.
 
 ## Getting Started
+
+PC와 같은 Wi-Fi의 휴대폰에서 테스트하려면 `npm run dev:lan`을 실행합니다.
+PC는 `http://localhost:3000`, 휴대폰은 `http://<Mac의 Wi-Fi IP>:3000`으로 접속합니다.
+Mac의 Wi-Fi IP는 `ipconfig getifaddr en0`으로 확인합니다.
+내신분석실 경로는 `/exam-analysis`, 관리자 자료 등록 경로는 `/admin/resources`입니다.
 
 First, run the development server:
 
