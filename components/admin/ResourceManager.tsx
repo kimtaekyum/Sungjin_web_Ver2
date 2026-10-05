@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import {
-  RESOURCE_BUCKET, LEVEL_LABELS, SUBJECT_LABELS, EXAM_LABELS, subjectsForLevel,
+  RESOURCE_BUCKET, SUBJECT_LABELS, EXAM_LABELS, subjectsForLevel,
   type ExamResource, type ResourceLevel, type ResourceSubject, type ExamType,
 } from "@/lib/resources";
+
+import ResourceLibrary from "./ResourceLibrary";
 
 export default function ResourceManager() {
   const [level, setLevel] = useState<ResourceLevel>("middle");
@@ -17,41 +19,19 @@ export default function ResourceManager() {
   const [schoolName, setSchoolName] = useState("");
   const [grade, setGrade] = useState("");
   const [exam, setExam] = useState<ExamType | "">("");
-  const [items, setItems] = useState<ExamResource[]>([]);
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [listMessage, setListMessage] = useState("");
   const [reload, setReload] = useState(0);
   const [editing, setEditing] = useState<ExamResource | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const params = new URLSearchParams({ level, year, semester, subject, page: String(page) });
-    fetch(`/api/resources?${params}`, { cache: "no-store", signal: controller.signal })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "목록을 불러오지 못했습니다.");
-        if (controller.signal.aborted) return;
-        setItems(data.items);
-        setHasMore(data.hasMore);
-      })
-      .catch((err) => {
-        if (controller.signal.aborted) return;
-        setItems([]);
-        setHasMore(false);
-        setMessage(err instanceof Error ? err.message : "목록을 불러오지 못했습니다.");
-      })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
-    return () => controller.abort();
-  }, [level, year, semester, subject, page, reload]);
+  const reloadItems = () => setReload((value) => value + 1);
 
-  const reloadItems = () => {
-    setLoading(true);
-    setReload((value) => value + 1);
+  const navigateToForm = () => {
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    formRef.current?.querySelector("select")?.focus({ preventScroll: true });
   };
 
   const getToken = async () => {
@@ -103,7 +83,6 @@ export default function ResourceManager() {
       if (fileRef.current) fileRef.current.value = "";
       setMessage(warning || (editing ? (file ? "PDF를 교체하고 자료 정보를 저장했습니다." : "자료 정보를 수정했습니다.") : "PDF 자료를 등록했습니다."));
       setEditing(null);
-      if (!editing || file) setPage(0);
       reloadItems();
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "업로드에 실패했습니다.");
@@ -124,7 +103,7 @@ export default function ResourceManager() {
     setEditing(item); setTitle(item.title); setSchoolName(item.schoolName ?? ""); setGrade(item.grade ?? ""); setExam(item.exam ?? "");
     setFile(null); if (fileRef.current) fileRef.current.value = "";
     setMessage("");
-    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    navigateToForm();
   };
 
   const cancelEdit = () => {
@@ -135,7 +114,7 @@ export default function ResourceManager() {
   const remove = async (item: ExamResource) => {
     if (!window.confirm(`‘${item.title || item.name}’ 자료를 삭제할까요?`)) return;
     setBusy(true);
-    setMessage("");
+    setListMessage("");
     try {
       const token = await getToken();
       const res = await fetch("/api/resources", {
@@ -145,37 +124,41 @@ export default function ResourceManager() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "삭제하지 못했습니다.");
-      setMessage("파일을 삭제했습니다.");
-      if (items.length === 1 && page > 0) setPage(page - 1);
+      setListMessage("파일을 삭제했습니다.");
       reloadItems();
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : "삭제하지 못했습니다.");
+      setListMessage(err instanceof Error ? err.message : "삭제하지 못했습니다.");
     } finally { setBusy(false); }
   };
 
   const fieldClass = "w-full rounded-lg border border-border bg-white px-4 py-2.5 text-sm focus:border-primary focus:outline-none";
-  const years = Array.from({ length: Math.max(1, new Date().getFullYear() - 2024) }, (_, i) => String(2026 + i)).reverse();
+  const years = [...new Set([
+    ...Array.from({ length: Math.max(1, new Date().getFullYear() - 2024) }, (_, i) => String(2026 + i)), year,
+  ])].sort((a, b) => Number(b) - Number(a));
   return <section className="max-w-4xl">
     <p className="mb-6 text-sm text-text-sub">PDF를 분류별로 등록하면 학생들이 내려받을 수 있습니다.</p>
 
-    <form ref={formRef} onSubmit={upload} className="scroll-mt-24 rounded-2xl border border-border bg-surface p-5 md:p-7">
+    <ResourceLibrary refreshKey={reload} busy={busy} editing={Boolean(editing)} actionMessage={listMessage} onEdit={edit} onRemove={remove} onFormNavigate={navigateToForm} />
+
+    <form ref={formRef} onSubmit={upload} className="mt-9 scroll-mt-24 rounded-2xl border border-border bg-surface p-5 md:p-7">
       <h2 className="mb-5 text-lg font-semibold">{editing ? "PDF 자료 수정" : "PDF 자료 등록"}</h2>
+      <p className="mb-5 text-sm text-text-sub">등록할 자료의 학교·과목·연도·학기를 선택해주세요.</p>
       {editing && <p className="mb-5 break-all rounded-lg bg-bg p-3 text-sm text-text-sub">현재 파일: {editing.name}<br />파일을 선택하면 PDF가 교체됩니다. 선택하지 않으면 제목과 분류만 수정합니다.</p>}
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="text-sm font-medium">학교
-          <select disabled={busy} value={level} onChange={(e) => { setLevel(e.target.value as ResourceLevel); setSubject("korean"); setPage(0); setLoading(true); setMessage(""); }} className={`mt-2 ${fieldClass}`}>
+          <select disabled={busy} value={level} onChange={(e) => { setLevel(e.target.value as ResourceLevel); setSubject("korean"); setMessage(""); }} className={`mt-2 ${fieldClass}`}>
             <option value="middle">중등</option><option value="high">고등</option>
           </select>
         </label>
         <label className="text-sm font-medium">과목
-          <select disabled={busy} value={subject} onChange={(e) => { setSubject(e.target.value as ResourceSubject); setPage(0); setLoading(true); setMessage(""); }} className={`mt-2 ${fieldClass}`}>
+          <select disabled={busy} value={subject} onChange={(e) => { setSubject(e.target.value as ResourceSubject); setMessage(""); }} className={`mt-2 ${fieldClass}`}>
             {subjectsForLevel(level).map((value) => <option key={value} value={value}>{SUBJECT_LABELS[value]}</option>)}
           </select>
         </label>
       </div>
       <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <label className="text-sm font-medium">연도
-          <select disabled={busy} value={year} onChange={(e) => { setYear(e.target.value); setPage(0); setLoading(true); setMessage(""); }} className={`mt-2 ${fieldClass}`}>
+          <select disabled={busy} value={year} onChange={(e) => { setYear(e.target.value); setMessage(""); }} className={`mt-2 ${fieldClass}`}>
             {years.map((value) => <option key={value} value={value}>{value}년</option>)}
           </select>
         </label>
@@ -188,7 +171,7 @@ export default function ResourceManager() {
           </select>
         </label>
         <label className="text-sm font-medium">학기
-          <select disabled={busy} value={semester} onChange={(e) => { setSemester(e.target.value); setPage(0); setLoading(true); setMessage(""); }} className={`mt-2 ${fieldClass}`}>
+          <select disabled={busy} value={semester} onChange={(e) => { setSemester(e.target.value); setMessage(""); }} className={`mt-2 ${fieldClass}`}>
             <option value="1">1학기</option><option value="2">2학기</option>
           </select>
         </label>
@@ -215,24 +198,5 @@ export default function ResourceManager() {
       {message && <p role="status" className="mt-3 text-sm text-text-sub">{message}</p>}
     </form>
 
-    <div className="mt-9">
-      <h2 className="mb-4 text-lg font-semibold">{LEVEL_LABELS[level]} · {year}년 · {semester}학기 · {SUBJECT_LABELS[subject]} 자료</h2>
-      {loading ? <p className="text-text-sub">목록을 불러오는 중입니다...</p> : items.length === 0 ? <p className="rounded-xl border border-border bg-surface p-8 text-center text-text-sub">등록된 파일이 없습니다.</p> :
-        <ul className="space-y-2">{items.map((item) => <li key={item.path} className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0"><p className="break-all text-sm font-medium">{item.title || item.name}</p>
-            <p className="mt-1 break-all text-xs text-text-sub">{[item.schoolName, item.grade && `${item.grade}학년`, item.exam && EXAM_LABELS[item.exam]].filter(Boolean).join(" · ") || "공통 자료"}</p>
-            <p className="mt-1 break-all text-xs text-text-hint">{item.name} · {new Date(item.createdAt).toLocaleDateString("ko-KR")}</p></div>
-          <div className="flex shrink-0 flex-wrap gap-2">
-            <a href={`/api/resources/preview?path=${encodeURIComponent(item.path)}`} target="_blank" rel="noopener noreferrer" aria-label={`${item.title || item.name} PDF 미리보기 (새 창)`} className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-bg">미리보기</a>
-            <button type="button" disabled={busy} onClick={() => edit(item)} className="rounded-lg border border-border px-3 py-2 text-sm disabled:opacity-50">수정</button>
-            <button type="button" disabled={busy || Boolean(editing)} onClick={() => void remove(item)} className="rounded-lg border border-danger/30 px-3 py-2 text-sm text-danger disabled:opacity-50">삭제</button>
-          </div>
-        </li>)}</ul>}
-      {(page > 0 || hasMore) && <div className="mt-5 flex justify-center gap-3">
-        <button type="button" disabled={page === 0 || busy || loading} onClick={() => { setPage(page - 1); setLoading(true); }} className="rounded-lg border border-border px-4 py-2 text-sm disabled:opacity-40">이전</button>
-        <span className="self-center text-sm text-text-sub">{page + 1}페이지</span>
-        <button type="button" disabled={!hasMore || busy || loading} onClick={() => { setPage(page + 1); setLoading(true); }} className="rounded-lg border border-border px-4 py-2 text-sm disabled:opacity-40">다음</button>
-      </div>}
-    </div>
   </section>;
 }
