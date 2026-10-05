@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseServer";
 import {
   RESOURCE_BUCKET, resourceDetailsFromPath, resourceFolder, validCategory, validResourcePath, validPendingResourcePath, validResourceMetadata,
-  type ExamResource,
+  RESOURCE_LEVELS, RESOURCE_SEMESTERS, RESOURCE_SUBJECTS,
+  type ResourceLevel, type ResourceSubject,
 } from "@/lib/resources";
+
+import { listResources } from "@/lib/resourceListing";
 
 export const dynamic = "force-dynamic";
 
@@ -29,41 +32,24 @@ export async function GET(request: Request) {
   const grade = params.get("grade") ?? "";
   const exam = params.get("exam") ?? "";
   const q = (params.get("q") ?? "").trim();
-  if (!validCategory(level, year, semester, subject) || !Number.isInteger(page) || page < 0 || page > 100) {
+  if ((level && !RESOURCE_LEVELS.includes(level as ResourceLevel)) ||
+      (year && (!/^20\d{2}$/.test(year) || Number(year) < 2026)) ||
+      (semester && !RESOURCE_SEMESTERS.includes(semester as "1" | "2")) ||
+      (subject && !RESOURCE_SUBJECTS.includes(subject as ResourceSubject)) ||
+      !Number.isSafeInteger(page) || page < 0) {
     return NextResponse.json({ error: "분류가 올바르지 않습니다." }, { status: 400 });
   }
   if (!validResourceMetadata({ schoolName, grade, exam }) || q.length > 100) {
     return NextResponse.json({ error: "검색 조건이 올바르지 않습니다." }, { status: 400 });
   }
-
-  const folder = resourceFolder(level, year, semester, subject);
-  const allItems: ExamResource[] = [];
-  // 검색과 필터를 페이지 분할 전에 적용해 다음 페이지의 자료도 찾는다.
-  for (let offset = 0; ; offset += 1000) {
-    const { data, error } = await supabaseAdmin.storage.from(RESOURCE_BUCKET).list(folder, {
-      limit: 1000, offset, sortBy: { column: "created_at", order: "desc" },
-    });
-    if (error && isMissingBucket(error)) break;
-    if (error) {
-      console.error("내신분석실 목록 조회 실패:", error);
-      return NextResponse.json({ error: "자료 목록을 불러오지 못했습니다." }, { status: 500 });
-    }
-    for (const file of data ?? []) {
-      if (!file.id || !validResourcePath(`${folder}/${file.name}`)) continue;
-      allItems.push({ path: `${folder}/${file.name}`, ...resourceDetailsFromPath(file.name),
-        createdAt: file.created_at ?? "", size: Number(file.metadata?.size ?? 0) });
-    }
-    if ((data?.length ?? 0) < 1000) break;
+  try {
+    const result = await listResources({ level: level as ResourceLevel | "", year, semester,
+      subject: subject as ResourceSubject | "", page, schoolName, grade, exam, q });
+    return NextResponse.json(result, { headers: { "Cache-Control": "no-store" } });
+  } catch (error) {
+    console.error("내신분석실 목록 조회 실패:", error);
+    return NextResponse.json({ error: "자료 목록을 불러오지 못했습니다." }, { status: 500 });
   }
-
-  const normalize = (value: string) => value.normalize("NFKC").toLocaleLowerCase("ko-KR");
-  const filtered = allItems.filter((item) => (!schoolName || item.schoolName === schoolName) &&
-    (!grade || item.grade === grade) && (!exam || item.exam === exam) &&
-    (!q || normalize(`${item.title} ${item.schoolName}`).includes(normalize(q))));
-  const schools = [...new Set(allItems.map((item) => item.schoolName).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ko"));
-  return NextResponse.json({ items: filtered.slice(page * 50, (page + 1) * 50), hasMore: filtered.length > (page + 1) * 50, total: filtered.length, schools }, {
-    headers: { "Cache-Control": "no-store" },
-  });
 }
 
 export async function POST(request: Request) {

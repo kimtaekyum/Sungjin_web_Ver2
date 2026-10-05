@@ -28,13 +28,11 @@ export const SUBJECT_LABELS: Record<ResourceSubject, string> = {
   korean: "국어",
   math: "수학",
   english: "영어",
-  science: "과학",
+  science: "통합과학",
 };
 
 export function subjectsForLevel(level: ResourceLevel): ResourceSubject[] {
-  return level === "middle"
-    ? ["korean", "math", "english"]
-    : ["korean", "math", "english", "science"];
+  return RESOURCE_LEVELS.includes(level) ? [...RESOURCE_SUBJECTS] : [];
 }
 
 export function validCategory(level: unknown, year: unknown, semester: unknown, subject: unknown): boolean {
@@ -99,6 +97,10 @@ export function resourceTitleFromPath(path: string): string {
 }
 
 export interface ExamResource extends ResourceMetadata {
+  level: ResourceLevel;
+  year: string;
+  semester: string;
+  subject: ResourceSubject;
   path: string;
   name: string;
   title: string;
